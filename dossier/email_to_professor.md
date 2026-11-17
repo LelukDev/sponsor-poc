@@ -5,7 +5,7 @@ Hello Mr Saint-Cirgue,
 Please find our final project for Monetizing Data & AI.
 
 - **Pitch deck (PDF, 10 slides):** attached
-- **Working proof of concept:** [PASTE THE LIVE LINK HERE]
+- **Working proof of concept:** https://sponsio-club.streamlit.app
 
 The demo shows our moment of truth live. You name a local business, you can upload its logo, and you get an offer for the club's free slots, with the logo placed on realistic photos.
 

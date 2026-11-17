@@ -1,6 +1,6 @@
 {
   "product_name": "Sponsio",
-  "demo_url": null,
+  "demo_url": "https://sponsio-club.streamlit.app",
   "team": [
     {
       "name": "Lucas Noury",
