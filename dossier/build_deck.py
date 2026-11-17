@@ -202,15 +202,15 @@ s.append(slide(7, "Competition and defensibility", "Others write offers or find 
 
 PEOPLE = [
     ("AI and product build", "Built the app, the checks and the photos", "Slides 2 and 3"),
-    ("Clubs and partnerships", "Club needs, pilots, districts and leagues", "Slides 1 and 6"),
-    ("Finance and pricing", "Market size, price and cash plan", "Slides 4, 5 and 9"),
-    ("Design and communication", "Pitch, slides and competition", "Slides 7, 8 and 10"),
+    ("Clubs and partnerships", "Introduction, club needs and pilots", "Intro, slides 1 and 6"),
+    ("Finance and pricing", "Price, cash plan and the ask", "Slides 5, 9 and 10"),
+    ("Market and competition", "Market size, rivals and the team", "Slides 4, 7 and 8"),
 ]
 cards = "".join(
     f'<div class="person"><div class="avatar">{html.escape(m["name"][0])}</div><b>{html.escape(m["name"])}</b><span class="role">{html.escape(m["role"])}</span><span>{html.escape(PEOPLE[i][1])}</span><em>{html.escape(PEOPLE[i][2])}</em></div>'
     for i, m in enumerate(CFG["team"])
 )
-s.append(slide(8, "Team", "Four people, four parts of the project", f'<div class="team">{cards}</div><div class="moment" style="margin-top:26px">Product, clubs, finance and communication: <b>every part of the project has an owner</b>. We each present our own part and answer questions on it.</div><p class="small">MSc students at Albert School.</p>', ""))
+s.append(slide(8, "Team", "Four people, four parts of the project", f'<div class="team">{cards}</div><div class="moment" style="margin-top:26px">Product, clubs, finance and market: <b>every part of the project has an owner</b>. We each present our own part and answer questions on it.</div><p class="small">MSc students at Albert School.</p>', ""))
 
 rows = "".join(
     f"<tr><td>Month {t}</td><td>{n:.0f}</td><td>{eur(rev)}</td><td>{eur_k(c)}</td></tr>"
