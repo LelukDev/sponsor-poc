@@ -2,26 +2,129 @@
 
 This is a team document for practice. It is **not** sent to the professor.
 
-The defence lasts 15 minutes for the talk and the demo, then 5 minutes of questions. Each extra minute costs 1 point, so we aim for **12 to 13 minutes**. All four of us speak. Replace A, B, C, D with your first names.
+The defence lasts 15 minutes for the talk and the demo, then 5 minutes of questions. Each extra minute costs 1 point, so the plan below lasts **about 13 minutes** (the budget column adds up to 13:15, and the words alone take about 12 minutes). That leaves about 2 minutes of safety. All four of us speak.
 
-## 1. Who speaks and for how long
+## 1. Who speaks, and for how long
 
-| Slide | Who | Time | One sentence to say |
+| Order | Slide | Speaker | Time |
 |---|---|---|---|
-| 1 Problem | A | 1 min | A volunteer treasurer writes every offer alone, and some slots stay unsold. |
-| 2 Solution | A | 1 min | A business name goes in, an offer with its logo on the kit comes out. |
-| 3 Live demo | B | 3 min | The jury chooses, and the offer changes. |
-| 4 Market analysis | C | 1 min | 56,100 clubs can pay, and we can reach 4,726 today. |
-| 5 Business model and price | C | 1 min | €15 a month, which is 23% of the value we create. |
-| 6 Traction | D | 1 min | No paying club yet. Here is what is proven and what comes next. |
-| 7 Competition and defensibility | D | 1.5 min | Others write offers or find deals. We show the logo on the kit. |
-| 8 Team | all | 0.5 min | Each person says who they are in one sentence. |
-| 9 Financials | C | 1 min | We break even at 122 clubs, in month 11. |
-| 10 The ask | D | 0.5 min | €35,000 for 18 months, three milestones. |
+| 0 | Opening | Henry | 0:15 |
+| 1 | Problem | Joshai | 1:15 |
+| 2 | Solution | Lucas | 1:15 |
+| 3 | Live demo | Lucas (Joshai types the inputs) | 2:45 |
+| 4 | Market analysis | Eyal | 1:15 |
+| 5 | Business model and price | Eyal | 1:15 |
+| 6 | Traction | Joshai | 1:00 |
+| 7 | Competition and defensibility | Henry | 1:15 |
+| 8 | Team | Henry, then each person | 0:45 |
+| 9 | Financials | Eyal | 1:30 |
+| 10 | The ask | Henry | 0:45 |
+| | **Total** | Lucas 4:00, Eyal 4:00, Henry 3:00, Joshai 2:15 (plus Joshai in the demo) | **13:15** |
 
-**First sentence (A): a person, a pain, a number.** "Julien is the volunteer treasurer of a club with 320 members. Sponsors bring about 9% of the club's money, and he writes every offer alone, in the evening."
+Speaking speed: about 140 words a minute. Each text below is written to fit its time. Say it in your own words, but keep the numbers and the order. Slow down on the numbers.
 
-## 2. The demo (B), 3 minutes
+## 2. The words, slide by slide
+
+### Opening (Henry, 0:15)
+
+"Hello, and thank you. We are Lucas, Joshai, Eyal and Henry. We built Sponsio, an assistant that helps a small sports club find sponsors. We will show you the problem, a live demo that you control, and our plan. The whole talk takes about thirteen minutes."
+
+### 1. Problem (Joshai, 1:15)
+
+"Let me start with Julien. Julien is the volunteer treasurer of a football club with 320 members. This is an example, but it is a real situation. Sponsors bring about 9% of the money of a club like his. That is a lot, because 37% of clubs lose money.
+
+When Julien looks for a sponsor, he does the same thing every time. He writes one offer alone, in the evening, and he sends the same PDF to every business. Three things go wrong. The pitch is the same for everyone. Sometimes he offers a slot that is already sold, because nobody has the list in mind. And the offer does not say what the club needs, like a new minibus or a tournament.
+
+For a mid-size club, sponsoring is about 7,200 euros a year. So a better way to sell it is worth real money. This is the problem we want to solve."
+
+### 2. Solution (Lucas, 1:15)
+
+"Our solution is simple. The club writes its slots once: the prices, who already sponsors it, and what it needs. Then, to make an offer, you type the name of a local business.
+
+The AI reads the club's list and chooses three offers: an entry offer, a recommended one and a premium one. Then our code checks the AI. It only keeps free slots. It takes the prices from the club's list, not from the AI. It warns if the business is a competitor of a current sponsor. And it blocks alcohol, tobacco and betting before anything is sent to the AI.
+
+Last, the app shows realistic photos with the logo on the kit, the boards or the minibus. You can see on this slide the empty boards before, and the boards with a sponsor's logo after.
+
+This is our moment of truth: you type a business name, and in a few seconds you get an offer with its logo on the club's kit. Let us show you now."
+
+### 3. Live demo (Lucas speaks, Joshai types, 2:45)
+
+Before the talk, open the link and test the five inputs of section 3 below. Show the screen in full size.
+
+1. (0:15) "Joshai plays Julien. Julien wants an offer for a garage. Joshai, please ask the jury for the name of a business." If the jury gives no idea, type **Garage Martin**. Upload the jury's logo if they have one. If not, use the example logo.
+2. (0:30) Click the button. While it runs: "It takes about four to five seconds, and it costs about 0.06 cents."
+3. (0:45) Read the result. "Three offers. Look at the recommended one: it uses the minibus, because the club needs to replace it, and the garage is a good fit. The prices are the ones from the club's list. Here are the photos: the logo is on the minibus and on the banner."
+4. (0:30) Show the limit: "Now a competitor." Type **Agence immobilière Century**. "A real estate company already sponsors the chest of the jersey, so the tool warns us. It does not hide the problem."
+5. (0:30) Show the rule: "Joshai, a wine bar please." Type **Cave à vins du Rhône**. "It is blocked before any AI call, because alcohol advertising is restricted in sport."
+6. (0:15) Optional, if time: open the club profile, change one free slot to taken, and generate again. "The offers change, because the slot is gone."
+
+"This is the whole product. The photos are prepared once, and the logo is placed by our code, so the cost stays very low."
+
+If something fails: say it calmly, use the phone hotspot, and show the photos on the slides. Never show the Secrets panel or the key.
+
+### 4. Market analysis (Eyal, 1:15)
+
+"Now the market. We count it from the bottom up: clubs that can pay, multiplied by our price.
+
+In France there are about 165,000 sports clubs. We keep two types. Mid-size clubs are 31% of them, with a budget of about 80,000 euros. They would pay 15 euros a month, so 180 euros a year. Flagship clubs are 3%, with a budget of about 918,000 euros. They would pay 150 euros a month. Small clubs are 66% of clubs. We leave them out, because their sponsoring is about 1,000 euros a year, so the gain is too small to pay for a tool.
+
+That gives a total market of 18.1 million euros. This is small, and we say it. Our starting point is football and rugby: 4,726 clubs that fit, which is 1.53 million euros. In three years we target 400 clubs, so 137,000 euros a year. That is about 11 new clubs a month. The club data is old, and we know it. We will check it with the ministry."
+
+### 5. Business model and price (Eyal, 1:15)
+
+"Our model is a monthly subscription for each club. A mid-size club pays 15 euros a month. A flagship club pays 150.
+
+How did we choose 15? We start from the value. A mid-size club earns about 7,200 euros a year from sponsors. If the tool raises it by 30%, and a club uses it 40% of the time in the first year, the net gain is about 780 euros a year, or 65 euros a month. Our price of 15 euros is 23% of that value. The rule of our course says to charge between 10 and 30%, so we are in the range.
+
+15 euros is also lower than the 19 to 49 euros that clubs already pay for management software. Our cost to serve a club is only about 3 euros a month, so the margin is high. For the club, the return in year 1 is about 333%.
+
+The 30% rise is an assumption. It is the weakest number we have, and we will test it in pilot clubs."
+
+### 6. Traction (Joshai, 1:00)
+
+"We want to be honest on this slide: we have no paying club yet. Here is what we can prove, and what comes next.
+
+Today, the demo works on any business, in four to five seconds, for less than one cent. Taken slots are never offered, and sector conflicts are flagged.
+
+In the next 30 days, we will call 10 mid-size clubs, start 3 pilot clubs, and meet 2 contacts in districts or leagues, because they can pass the tool on to many clubs.
+
+There are three things we still must prove: that sponsoring really goes up, that clubs pay 15 euros a month, and that districts help us. Our goal for the pilot is simple: plus 15% of sponsoring, or two new sponsors per club, in one season."
+
+### 7. Competition and defensibility (Henry, 1:15)
+
+"Who else works on this? We found four types of players. All Sponsored scans social media and finds deals. Leedeel is a website that links brands and clubs. Spencer.club is a person who connects both sides. And there are generic tools to write proposals.
+
+As far as we can tell, none of them writes one offer for one business, with its logo on the club's kit, and checks the club's list of free slots. We did not test their products, so this is based on their websites.
+
+Can they copy us? A prompt and a screen can be copied in a weekend, and we know it. So we do not rely on technology. We rely on three things. First, data on which offers are accepted. Second, links with districts and leagues, who bring us many clubs at once. Third, the club's own habits: once its slots and sponsors are in the tool, it is hard to leave."
+
+### 8. Team (Henry, then each person, 0:45)
+
+Henry: "Our team has four people, and each one owns one part."
+- Lucas (5 s): "I built the app, the checks and the photos."
+- Joshai (5 s): "I work on the clubs: their needs, the pilots and the districts."
+- Eyal (5 s): "I built the market size, the price and the cash plan."
+- Henry (5 s): "I take care of the pitch, the slides and the competition."
+
+### 9. Financials (Eyal, 1:30)
+
+"Now the numbers. The graph shows our cash over 36 months. We start with fixed costs of 3,000 euros a month. We assume the number of clubs grows in a straight line up to 400 after 3 years.
+
+Our gross margin is 86%, because the AI costs almost nothing: about 4 dollars a month for 400 clubs.
+
+The break-even point is 122 clubs, and we reach it in month 11. Before that, cash goes down to its lowest point, minus 15,000 euros. After that, it goes up. At month 36, we have 400 clubs, 11,400 euros of revenue a month, and about 74,000 euros of cash.
+
+Everything here depends on our assumptions: the prices, and the speed at which we sign clubs. If we sign half as many clubs, break-even comes later. Our calculation file lets us change one number and see the result."
+
+### 10. The ask (Henry, 0:45)
+
+"So here is our ask. We are looking for 35,000 euros, for 18 months. It is built from two numbers: the lowest cash point, about 15,000 euros, plus six months of fixed costs, 18,000 euros, rounded up.
+
+In 18 months, we will deliver three things: three pilot clubs with measured results, one agreement with a district or a league, and the 122 paying clubs that we need to break even.
+
+You have seen a working product, a small market that we can count, and a clear plan. Thank you. We are ready for your questions."
+
+## 3. The demo checks
 
 Open the link 10 minutes before. Test these five inputs first.
 
@@ -33,16 +136,9 @@ Open the link 10 minutes before. Test these five inputs first.
 | 4 | Chez Momo | A person must check: we cannot tell what the business does | tricky |
 | 5 | Cave à vins du Rhône | Blocked before any call to the AI | out of scope |
 
-Steps:
-1. Say in one sentence who the user is: "Julien wants an offer for a garage."
-2. Let the jury choose the business. Upload the jury's own logo if they have one.
-3. Point out two things: taken slots are never offered, and the price comes from the club's list, not from the AI.
-4. Show one limit case: a competitor of a sponsor, or the wine cellar.
-5. Say the numbers: about $0.0006 and 4 to 5 seconds for the writing.
-
 If the network fails, use your phone as a hotspot. If the app is asleep, wait a few seconds and do not reload many times. Never show the API key or the *Secrets* panel. Never replace the demo with a video.
 
-## 3. What not to say
+## 4. What not to say
 
 - "We have clients", or "clubs have confirmed": it is not true yet.
 - "Sponsoring will rise by 30% for sure": it is an assumption, the weakest one in our numbers.
@@ -50,7 +146,7 @@ If the network fails, use your phone as a hotspot. If the app is asleep, wait a 
 - "The photos are made by AI live": no. They are prepared once, and the logo is placed by code.
 - "We have no competitors": we do (All Sponsored, Leedeel, Spencer.club, SPONSO+, proposal tools).
 
-## 4. Questions the jury may ask
+## 5. Questions the jury may ask
 
 **Why this use case, and not another?**
 We scored six ideas with the three-question test (pay, switch, degrade), then RICE and ICE. Membership fee reminders score higher on volume, but cheap tools already exist, so it is a fill-in to buy. Sponsoring is the only idea that is must-have, high impact and easy to build: a quick win. Our confidence scores are guesses, so we will call 10 clubs to test them.
@@ -109,7 +205,7 @@ The code checks every slot and sets every price. The email says it must be read 
 **One question for each person**
 Each member must explain their own numbers alone: where each figure comes from (source or assumption), and what would change it. Practise by asking each other questions on the numbers file.
 
-## 5. The day before
+## 6. The day before
 
 - [ ] The demo link is open and tested with a real logo (png and jpg) and the five inputs
 - [ ] The deck PDF and the link are sent before Monday 23 November

@@ -2,9 +2,21 @@
   "product_name": "Sponsio",
   "demo_url": null,
   "team": [
-    {"name": null, "role": "AI and product build"},
-    {"name": null, "role": "Clubs and partnerships"},
-    {"name": null, "role": "Finance and pricing"},
-    {"name": null, "role": "Design and communication"}
+    {
+      "name": "Lucas Noury",
+      "role": "AI and product build"
+    },
+    {
+      "name": "Joshai Bensoussan",
+      "role": "Clubs and partnerships"
+    },
+    {
+      "name": "Eyal Toledano",
+      "role": "Finance and pricing"
+    },
+    {
+      "name": "Henry Falcon",
+      "role": "Design and communication"
+    }
   ]
 }
