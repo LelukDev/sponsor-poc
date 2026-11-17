@@ -30,9 +30,9 @@ def test_guardrail_unclear():
 
 
 def test_prices_fixed_and_formatted():
-    assert [p.price_eur for p in PACKAGES] == [300, 800, 1500]
+    assert [p.price_eur for p in PACKAGES] == [500, 800, 1500]
     assert format_price(1500) == "1 500 €"
-    assert total_if_all() == 2600
+    assert total_if_all() == 2800
 
 
 def test_mockups_are_valid_svg_with_and_without_logo():

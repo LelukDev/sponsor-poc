@@ -130,7 +130,7 @@ if state:
 with st.expander("Hypothèses de cette démonstration"):
     st.markdown(
         "- Le club, ses effectifs et ses supports sont fictifs.\n"
-        "- Les prix (300 €, 800 €, 1 500 €) sont une grille d'exemple, calculée hors IA.\n"
+        "- Les prix (500 €, 800 €, 1 500 € par saison) sont une grille d'exemple, calculée hors IA.\n"
         "- Sans logo, le nom du commerce est utilisé à la place.\n"
         "- Les commerces d'alcool, de tabac et de jeux d'argent sont écartés avant tout appel à l'IA.\n"
         "- Aucun envoi réel d'e-mail, aucune connexion, aucun paiement."

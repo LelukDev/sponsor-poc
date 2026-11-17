@@ -12,7 +12,7 @@ class Package:
 
 
 PACKAGES = (
-    Package("bronze", "Bronze", "Panneau de stade", 300),
+    Package("bronze", "Bronze", "Panneau de stade", 500),
     Package("argent", "Argent", "Minibus du club", 800),
     Package("or", "Or", "Maillot (poitrine)", 1500),
 )
