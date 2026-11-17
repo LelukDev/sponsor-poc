@@ -1,6 +1,6 @@
 """Calculateur du dossier : une seule source pour tous les chiffres du pitch.
 
-Légende : [S] source citée · [M] mesuré sur le PoC · [H] hypothèse à tester.
+Légende : [S] source citée ; [M] mesuré sur le PoC ; [H] hypothèse à tester.
 Lancer : python dossier/calc.py  (écrit dossier/chiffres.md)
 """
 
@@ -141,7 +141,7 @@ I, P = res["intermediaire"], res["phare"]
 md = []
 w = md.append
 w("# Dossier de chiffres : une seule source pour tout le pitch\n")
-w("Légende : **[S]** source citée · **[M]** mesuré sur le PoC · **[H]** hypothèse à tester auprès de vrais clubs.\n")
+w("Légende : **[S]** source citée ; **[M]** mesuré sur le PoC ; **[H]** hypothèse à tester auprès de vrais clubs.\n")
 w("Généré par `dossier/calc.py`. Changer une hypothèse en tête du fichier, relancer, et tous les chiffres suivent.\n")
 
 w("## 1. Fiche de faits : le marché des clubs sportifs amateurs\n")
@@ -224,7 +224,7 @@ w("- Les photos réalistes sont générées une seule fois (7 images, environ 0,
 w(f"- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **{small_cost:.5f} $** par proposition ; temps de rédaction mesuré : 3,5 à 4,5 s.")
 w(f"- Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : {large_cost:.5f} $ par proposition.")
 calls_txt = f"{calls:,}".replace(",", " ")
-w(f"- À l'échelle du SOM : {calls_txt} propositions par mois → **{ai_small:.1f} $ par mois** avec le petit modèle ({ai_small/mrr_full:.2%} du chiffre d'affaires mensuel), {ai_large:.0f} $ avec le grand modèle ({ai_large/mrr_full:.1%}).")
+w(f"- À l'échelle du SOM : {calls_txt} propositions par mois, soit **{ai_small:.1f} $ par mois** avec le petit modèle ({ai_small/mrr_full:.2%} du chiffre d'affaires mensuel), {ai_large:.0f} $ avec le grand modèle ({ai_large/mrr_full:.1%}).")
 w("- Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps de rédaction mesuré (3,5 à 4,5 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.\n")
 
 w("## 7. Financiers (S4 et S5)\n")

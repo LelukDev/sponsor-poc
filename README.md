@@ -21,6 +21,17 @@ python tools/gen_scene.py nom "prompt avec rectangles magenta"   # génère une 
 python tools/prepare_scenes.py                                   # détecte les zones magenta, efface le magenta
 ```
 
+## Livrables du dossier
+
+```bash
+python dossier/calc.py            # chiffres : écrit dossier/chiffres.md
+python dossier/build_deck.py      # deck de 10 slides : dossier/deck.pdf
+python dossier/build_report.py    # rapport A4 : dossier/report.pdf
+python tools/audit.py             # audit : ponctuation, cohérence des chiffres, PDF
+```
+
+Le nom du produit, le lien de la démo et les noms de l'équipe se renseignent dans `dossier/deck_config.json`, puis on relance les deux constructions.
+
 ## Lancer en local
 
 ```bash

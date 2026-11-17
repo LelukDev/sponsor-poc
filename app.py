@@ -54,7 +54,7 @@ def build_download(business: str, plan: dict, images: dict) -> str:
         total = sum(plan["price"][i] for i in ids)
         cards = "".join(
             f"<div class='c'><img src='data:image/jpeg;base64,{base64.b64encode(images[i]).decode()}'>"
-            f"<p><strong>{html.escape(C.SLOT_BY_ID[i].label)}</strong> · {format_price(plan['price'][i])}</p>"
+            f"<p><strong>{html.escape(C.SLOT_BY_ID[i].label)}</strong>, {format_price(plan['price'][i])}</p>"
             f"<p>{html.escape(plan['benefits'].get(i, ''))}</p></div>"
             for i in ids
         )
@@ -82,8 +82,8 @@ st.caption(
 if "inv" not in st.session_state:
     st.session_state["inv"] = pd.DataFrame(C.default_inventory())
 
-with st.expander(f"Profil du club : {C.CLUB['name']} ({C.CLUB['sport']}, {C.CLUB['licensees']} licenciés, club fictif) - emplacements, sponsors, besoins"):
-    st.caption("Changez un statut, un prix ou un besoin : l'offre proposée s'adapte à la prochaine génération.")
+with st.expander(f"Profil du club (fictif) : emplacements, sponsors et besoins"):
+    st.caption(f"{C.CLUB['name']}, {C.CLUB['sport']}, {C.CLUB['licensees']} licenciés. Changez un statut, un prix ou un besoin : l'offre s'adapte à la prochaine génération.")
     base = st.session_state["inv"]
     edited = st.data_editor(
         base[["Emplacement", "Prix (€)", "Statut", "Sponsor actuel", "Secteur"]],
@@ -204,7 +204,7 @@ if state:
             for col, i in zip(cols, ids):
                 with col:
                     st.image(images[i], width="stretch")
-                    st.markdown(f"**{C.SLOT_BY_ID[i].label}** · {format_price(plan['price'][i])}")
+                    st.markdown(f"**{C.SLOT_BY_ID[i].label}**, {format_price(plan['price'][i])}")
                     st.caption(plan["benefits"].get(i, ""))
     if not state["has_logo"]:
         st.caption("Sans logo importé, le nom du commerce est utilisé à la place.")

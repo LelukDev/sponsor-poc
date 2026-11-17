@@ -174,3 +174,22 @@ def test_light_logo_stays_visible_on_white_support():
     q = np.array(scenes._zones()["pitch_boards"]["zones"][0]["quad"])
     cx, cy = int(q[:, 0].mean()), int(q[:, 1].mean())
     assert out[cy - 10 : cy + 10, cx - 10 : cx + 10].mean() < 120  # fond sombre posé derrière le logo clair
+
+
+# ---------- Ponctuation naturelle ----------
+def test_clean_text_removes_ai_dashes_and_arrows():
+    assert llm.clean_text("Votre logo \u2014 visible partout \u2014 sur le minibus") == "Votre logo, visible partout, sur le minibus"
+    assert llm.clean_text("Le minibus \u2013 notre besoin") == "Le minibus, notre besoin"
+    assert llm.clean_text("garage \u2192 automobile") == "garage : automobile"
+    assert llm.clean_text("Une phrase - avec un tiret de coupure") == "Une phrase, avec un tiret de coupure"
+    assert llm.clean_text("Pharmacie du Centre, à Lyon") == "Pharmacie du Centre, à Lyon"
+    assert llm.clean_text("sport-loisirs et santé-bien-être") == "sport-loisirs et santé-bien-être"
+
+
+def test_sanitize_cleans_every_text_field():
+    dirty = dict(BASE, fit_reason="a \u2014 b", email_subject="s \u2014 t", email_body="Bonjour,\n\nVotre garage \u2014 notre minibus.\nCordialement")
+    dirty["benefits"] = {"banderole": "x \u2014 y", "minibus": "y", "dos": "z"}
+    plan = llm.sanitize(dirty, C.default_inventory())
+    blob = " ".join([plan["fit_reason"], plan["email_subject"], plan["email_body"], *plan["benefits"].values()])
+    assert "\u2014" not in blob and "\u2013" not in blob
+    assert plan["email_body"].count("\n") == 3  # les sauts de ligne sont conservés

@@ -39,8 +39,10 @@ SYSTEM = (
     "dans ce cas needs_human vaut false, même si le champ « activité indiquée » est vide. "
     "needs_human vaut true seulement si le nom ne permet vraiment pas de connaître l'activité (nom de personne, "
     "nom de fantaisie) ; rédige alors une version générique prudente. Remplis toujours tous les champs.\n"
-    "- Secteurs : magasin ou club de sport → sport-loisirs ; boulangerie, boucherie, primeur → alimentation ; "
-    "garage, concessionnaire → automobile ; pharmacie, kiné, optique → santé-bien-être.\n"
+    "- Secteurs : un magasin ou club de sport relève de sport-loisirs ; boulangerie, boucherie, primeur : alimentation ; "
+    "garage, concessionnaire : automobile ; pharmacie, kiné, optique : santé-bien-être.\n"
+    "- Ponctuation naturelle : n'utilise jamais de tiret long, de demi-cadratin, de flèche ni de tiret pour couper une phrase ; "
+    "utilise des virgules et des points.\n"
     f"- sector doit être exactement l'une de ces valeurs : {', '.join(SECTORS)}."
 )
 
@@ -54,6 +56,19 @@ SCHEMA_HINT = (
     f'"email_body": "6 à 9 lignes, signé « Le bureau de {CLUB["name"]} »", '
     '"needs_human": false, "human_reason": ""}'
 )
+
+
+_DASHES = re.compile(r"\s*[\u2014\u2013\u2015]\s*|\s+-\s+")
+_ARROWS = re.compile(r"\s*[\u2192\u2190\u21d2]\s*")
+
+
+def clean_text(text: str) -> str:
+    """Retire les tirets longs, demi-cadratins, flèches et tirets de coupure typiques d'un texte généré."""
+    text = _DASHES.sub(", ", str(text))
+    text = _ARROWS.sub(" : ", text)
+    text = re.sub(r",\s*,", ",", text)
+    text = re.sub(r"\s+([,.])", r"\1", text)
+    return re.sub(r"[ \t]{2,}", " ", text).strip()
 
 
 class LLMError(RuntimeError):
@@ -140,9 +155,9 @@ def sanitize(data: dict, inventory: list[dict]) -> dict:
                 conflict = {"sponsor": r.get("Sponsor actuel") or "un sponsor", "sector": sector, "slot": r["Emplacement"]}
                 break
 
-    benefits = {i: str(data["benefits"].get(i, "")).strip() for i in {j for v in offers.values() for j in v}}
+    benefits = {i: clean_text(data["benefits"].get(i, "")) for i in {j for v in offers.values() for j in v}}
     needs_human = bool(data.get("needs_human"))
-    human_reason = str(data.get("human_reason") or "").strip()
+    human_reason = clean_text(data.get("human_reason") or "")
     if conflict:
         needs_human = True
         human_reason = (
@@ -151,12 +166,12 @@ def sanitize(data: dict, inventory: list[dict]) -> dict:
         ).strip()
     return {
         "sector": sector,
-        "fit_reason": str(data.get("fit_reason", "")).strip(),
-        "need_link": str(data.get("need_link", "")).strip(),
+        "fit_reason": clean_text(data.get("fit_reason", "")),
+        "need_link": clean_text(data.get("need_link", "")),
         "offers": offers,
         "benefits": benefits,
-        "email_subject": str(data["email_subject"]).strip(),
-        "email_body": str(data["email_body"]).strip(),
+        "email_subject": clean_text(data["email_subject"]),
+        "email_body": "\n".join(clean_text(l) if l.strip() else "" for l in str(data["email_body"]).splitlines()).strip(),
         "needs_human": needs_human,
         "human_reason": human_reason,
         "conflict": conflict,

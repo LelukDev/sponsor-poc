@@ -1,6 +1,6 @@
 # Dossier de chiffres : une seule source pour tout le pitch
 
-Légende : **[S]** source citée · **[M]** mesuré sur le PoC · **[H]** hypothèse à tester auprès de vrais clubs.
+Légende : **[S]** source citée ; **[M]** mesuré sur le PoC ; **[H]** hypothèse à tester auprès de vrais clubs.
 
 Généré par `dossier/calc.py`. Changer une hypothèse en tête du fichier, relancer, et tous les chiffres suivent.
 
@@ -117,7 +117,7 @@ Le prix reste sous les 19 à 49 € d'un logiciel de gestion : l'outil est un co
 - Les photos réalistes sont générées une seule fois (7 images, environ 0,47 $ au total) ; la pose du logo se fait ensuite par code, sans coût ni appel réseau.
 - Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **0,00055 $** par proposition ; temps de rédaction mesuré : 3,5 à 4,5 s.
 - Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : 0,01092 $ par proposition.
-- À l'échelle du SOM : 7 800 propositions par mois → **4,3 $ par mois** avec le petit modèle (0,04% du chiffre d'affaires mensuel), 85 $ avec le grand modèle (0,7%).
+- À l'échelle du SOM : 7 800 propositions par mois, soit **4,3 $ par mois** avec le petit modèle (0,04% du chiffre d'affaires mensuel), 85 $ avec le grand modèle (0,7%).
 - Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps de rédaction mesuré (3,5 à 4,5 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.
 
 ## 7. Financiers (S4 et S5)
