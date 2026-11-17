@@ -1,26 +1,5 @@
-"""Grille de prix : calcul déterministe, jamais produit par l'IA."""
-
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class Package:
-    key: str
-    tier: str
-    support: str
-    price_eur: int
-
-
-PACKAGES = (
-    Package("bronze", "Bronze", "Panneau de stade", 500),
-    Package("argent", "Argent", "Minibus du club", 800),
-    Package("or", "Or", "Maillot (poitrine)", 1500),
-)
+"""Mise en forme des prix. Les prix eux-mêmes viennent de l'inventaire du club (sponsor/club.py), jamais de l'IA."""
 
 
 def format_price(value: int) -> str:
-    return f"{value:,}".replace(",", " ") + " €"
-
-
-def total_if_all(packages=PACKAGES) -> int:
-    return sum(p.price_eur for p in packages)
+    return f"{int(value):,}".replace(",", " ") + " €"

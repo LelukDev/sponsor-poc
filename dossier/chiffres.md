@@ -15,7 +15,7 @@ Généré par `dossier/calc.py`. Changer une hypothèse en tête du fichier, rel
 | Part des partenariats dans les ressources | 9% | [S] CNOSF 2020 |
 | Prix d'un logiciel de gestion de club | 19 à 49 € / mois | [S] comparateurs 2026 |
 | Prix des supports | panneau 500-750 € HT ; maillot 1 500-5 000 € / saison ; minibus : aucune donnée | [S] une plaquette de rugby et un blog d'agence |
-| Grille de la démo | Panneau de stade 500 €, Minibus du club 800 €, Maillot (poitrine) 1 500 € | [H] bas de fourchette |
+| Grille de la démo (10 emplacements, € par saison) | Barnum 300, Chasubles 350, Short 400, Bâche d'entrée 500, Manche 600, Barrière principale 600, Dos 700, Minibus 800, Barrières x3 900, Maillot poitrine 1 500 | [H] bas de fourchette |
 
 ## 2. Choix du use case (S1)
 
@@ -107,17 +107,18 @@ Le prix reste sous les 19 à 49 € d'un logiciel de gestion : l'outil est un co
 ## 5 bis. Traction (slide 6) : ce qu'on peut dire honnêtement
 
 - Aucun client à ce jour : ne pas en prétendre.
-- Prouvé : un PoC en ligne qui produit une proposition en 3 à 4 s pour environ 0,0004 $, sur n'importe quel commerce choisi par le jury.
+- Prouvé : un PoC en ligne qui produit une proposition en 4 à 5 s pour environ 0,0006 $, sur n'importe quel commerce choisi par le jury.
 - Plan de pilote chiffré : 3 clubs intermédiaires, 1 saison, mesure avant/après du sponsoring signé (hypothèse +30 %). Succès : au moins +15 % ou 2 nouveaux sponsors par club.
 - À obtenir avant la soutenance si possible : 10 appels à des clubs, 2 ou 3 retours à citer, et une lettre d'intention d'un club ou d'un district. Seulement des retours réels.
 
 ## 6. Coût de l'IA, mesuré puis projeté (S3 et S5)
 
-- Une proposition = 1 appel, 516 tokens en entrée, 712 en sortie **[M]**.
-- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **0,00041 $** par proposition ; temps mesuré 3 à 4 s.
-- Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : 0,00815 $ par proposition.
-- À l'échelle du SOM : 7 800 propositions par mois → **3,2 $ par mois** avec le petit modèle (0,03% du chiffre d'affaires mensuel), 64 $ avec le grand modèle (0,6%).
-- Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps mesuré (3 à 4 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.
+- Une proposition = 1 appel (le modèle lit l'inventaire du club et choisit les emplacements), 1560 tokens en entrée, 780 en sortie **[M]**.
+- Les photos réalistes sont générées une seule fois (7 images, environ 0,47 $ au total) ; la pose du logo se fait ensuite par code, sans coût ni appel réseau.
+- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **0,00055 $** par proposition ; temps de rédaction mesuré : 3,5 à 4,5 s.
+- Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : 0,01092 $ par proposition.
+- À l'échelle du SOM : 7 800 propositions par mois → **4,3 $ par mois** avec le petit modèle (0,04% du chiffre d'affaires mensuel), 85 $ avec le grand modèle (0,7%).
+- Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps de rédaction mesuré (3,5 à 4,5 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.
 
 ## 7. Financiers (S4 et S5)
 

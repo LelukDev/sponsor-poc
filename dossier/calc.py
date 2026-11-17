@@ -29,13 +29,13 @@ MONTHS = 36
 FIXED_MONTH = 3_000           # 2 indemnités de 1 000 € + outils, juridique, déplacements [H]
 
 # Coût mesuré d'une proposition (PoC, OpenRouter) [M]
-TOK_IN, TOK_OUT = 516, 712
+TOK_IN, TOK_OUT = 1560, 780   # moyenne de 6 essais réels avec l'inventaire du club
 P_SMALL = (0.10, 0.50)        # $ par million de tokens, claude-haiku-5.5
 P_LARGE = (2.00, 10.00)       # claude-sonnet-5.5
 USD_EUR = 1.0                 # hypothèse de calcul [H]
 
 # Prix des supports de la démo [S/H]
-GRID = {"Panneau de stade": 500, "Minibus du club": 800, "Maillot (poitrine)": 1_500}
+GRID = {"Barnum 300": 300, "Chasubles 350": 350, "Short 400": 400, "Bâche d'entrée 500": 500, "Manche 600": 600, "Barrière principale 600": 600, "Dos 700": 700, "Minibus 800": 800, "Barrières x3 900": 900, "Maillot poitrine 1 500": 1_500}
 
 
 def eur(x, d=0):
@@ -153,7 +153,7 @@ w(f"| Clubs de proximité | {SHARE['proximite']:.0%} des clubs, budget moyen {eu
 w(f"| Part des partenariats dans les ressources | {SPONSOR_SHARE:.0%} | [S] CNOSF 2020 |")
 w(f"| Prix d'un logiciel de gestion de club | 19 à 49 € / mois | [S] comparateurs 2026 |")
 w(f"| Prix des supports | panneau 500-750 € HT ; maillot 1 500-5 000 € / saison ; minibus : aucune donnée | [S] une plaquette de rugby et un blog d'agence |")
-w(f"| Grille de la démo | {', '.join(f'{k} {eur(v)}' for k, v in GRID.items())} | [H] bas de fourchette |\n")
+w(f"| Grille de la démo (10 emplacements, € par saison) | {', '.join(GRID)} | [H] bas de fourchette |\n")
 
 w("## 2. Choix du use case (S1)\n")
 w("**Test des 3 questions** (payer, changer de concurrent, dégrader un chiffre) : 2 ou 3 oui = must-have.\n")
@@ -214,17 +214,18 @@ w("**Ne pas confondre deux prix.** Les 500 / 800 / 1 500 € de la démo sont ce
   "Les 15 et 150 € par mois sont ce que **nous** facturons **au club**.\n")
 w("## 5 bis. Traction (slide 6) : ce qu'on peut dire honnêtement\n")
 w("- Aucun client à ce jour : ne pas en prétendre.")
-w("- Prouvé : un PoC en ligne qui produit une proposition en 3 à 4 s pour environ 0,0004 $, sur n'importe quel commerce choisi par le jury.")
+w("- Prouvé : un PoC en ligne qui produit une proposition en 4 à 5 s pour environ 0,0006 $, sur n'importe quel commerce choisi par le jury.")
 w("- Plan de pilote chiffré : 3 clubs intermédiaires, 1 saison, mesure avant/après du sponsoring signé (hypothèse +30 %). Succès : au moins +15 % ou 2 nouveaux sponsors par club.")
 w("- À obtenir avant la soutenance si possible : 10 appels à des clubs, 2 ou 3 retours à citer, et une lettre d'intention d'un club ou d'un district. Seulement des retours réels.\n")
 
 w("## 6. Coût de l'IA, mesuré puis projeté (S3 et S5)\n")
-w(f"- Une proposition = 1 appel, {TOK_IN} tokens en entrée, {TOK_OUT} en sortie **[M]**.")
-w(f"- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **{small_cost:.5f} $** par proposition ; temps mesuré 3 à 4 s.")
+w(f"- Une proposition = 1 appel (le modèle lit l'inventaire du club et choisit les emplacements), {TOK_IN} tokens en entrée, {TOK_OUT} en sortie **[M]**.")
+w("- Les photos réalistes sont générées une seule fois (7 images, environ 0,47 $ au total) ; la pose du logo se fait ensuite par code, sans coût ni appel réseau.")
+w(f"- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **{small_cost:.5f} $** par proposition ; temps de rédaction mesuré : 3,5 à 4,5 s.")
 w(f"- Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : {large_cost:.5f} $ par proposition.")
 calls_txt = f"{calls:,}".replace(",", " ")
 w(f"- À l'échelle du SOM : {calls_txt} propositions par mois → **{ai_small:.1f} $ par mois** avec le petit modèle ({ai_small/mrr_full:.2%} du chiffre d'affaires mensuel), {ai_large:.0f} $ avec le grand modèle ({ai_large/mrr_full:.1%}).")
-w("- Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps mesuré (3 à 4 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.\n")
+w("- Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps de rédaction mesuré (3,5 à 4,5 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.\n")
 
 w("## 7. Financiers (S4 et S5)\n")
 w(f"- Clients à 36 mois : {som_clubs} ({SOM_CLUBS['intermediaire']} + {SOM_CLUBS['phare']}), montée linéaire.")

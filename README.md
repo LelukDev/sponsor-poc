@@ -6,12 +6,20 @@ Club, effectifs et prix : fictifs, voir `sponsor/club.py` et `sponsor/pricing.py
 
 ## Fonctionnement
 
-1. Garde-fou (`sponsor/guardrail.py`) : alcool, tabac, jeux d'argent, nom trop vague. Aucun appel d'IA dans ces cas.
-2. Rédaction (`sponsor/llm.py`) : un appel à un petit modèle via OpenRouter, grand modèle en secours.
-3. Prix : grille fixe, jamais produite par l'IA.
-4. Maquettes (`sponsor/mockups.py`) : dessins SVG, logo importé ou nom du commerce.
+1. **Profil du club** (modifiable dans l'application) : 10 emplacements avec prix, statut libre ou pris, sponsor actuel et son secteur ; besoins du club ; objectif de collecte.
+2. **Garde-fou** (`sponsor/guardrail.py`) : alcool, tabac, jeux d'argent, nom trop vague. Aucun appel d'IA dans ces cas.
+3. **Choix et rédaction** (`sponsor/llm.py`) : un appel à un petit modèle via OpenRouter (grand modèle en secours). Il choisit trois offres parmi les emplacements libres, selon le commerce et les besoins du club.
+4. **Vérification par le code** : seuls les emplacements réellement libres sont gardés, les prix viennent de l'inventaire, un concurrent d'un sponsor existant est signalé.
+5. **Photos réalistes** (`sponsor/scenes.py`) : le logo est posé en perspective, avec la lumière du support, sur des photos générées une fois (dossier `assets/scenes`). Les sponsors déjà en place apparaissent sur les photos. Aucun coût à l'exécution.
 
-Coût mesuré : environ 0,0004 $ et 3 à 4 secondes par proposition (modèle `anthropic/claude-haiku-5.5`).
+Coût mesuré : environ 0,0006 $ par proposition (modèle `anthropic/claude-haiku-5.5`), 3,5 à 4,5 s de rédaction.
+
+## Préparer de nouvelles photos (facultatif)
+
+```bash
+python tools/gen_scene.py nom "prompt avec rectangles magenta"   # génère une photo de base (environ 0,07 $)
+python tools/prepare_scenes.py                                   # détecte les zones magenta, efface le magenta
+```
 
 ## Lancer en local
 

@@ -1,27 +1,26 @@
+import io
 import json
-import xml.etree.ElementTree as ET
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
+from PIL import Image, ImageDraw
 
-from sponsor import llm
+from sponsor import club as C
+from sponsor import llm, scenes
 from sponsor.guardrail import check_business
-from sponsor.mockups import MOCKUPS, logo_data_uri
-from sponsor.pricing import PACKAGES, format_price, total_if_all
+from sponsor.pricing import format_price
 
 
+# ---------- Garde-fou et prix ----------
 def test_guardrail_blocks_alcohol_tobacco_gambling():
-    assert check_business("Cave à vins du Rhône").status == "blocked"
-    assert check_business("Le Bar des Sports").status == "blocked"
-    assert check_business("Tabac Presse Centrale").status == "blocked"
-    assert check_business("Casino de Lyon").status == "blocked"
+    for name in ("Cave à vins du Rhône", "Le Bar des Sports", "Tabac Presse Centrale", "Casino de Lyon"):
+        assert check_business(name).status == "blocked", name
 
 
 def test_guardrail_allows_normal_and_avoids_false_positives():
-    assert check_business("Boulangerie Dupont").status == "ok"
-    assert check_business("Garage Vincent").status == "ok"
-    assert check_business("Boulangerie de Paris").status == "ok"
-    assert check_business("Pharmacie du Centre").status == "ok"
+    for name in ("Boulangerie Dupont", "Garage Vincent", "Boulangerie de Paris", "Pharmacie du Centre"):
+        assert check_business(name).status == "ok", name
 
 
 def test_guardrail_unclear():
@@ -29,63 +28,149 @@ def test_guardrail_unclear():
     assert check_business("commerce").status == "unclear"
 
 
-def test_prices_fixed_and_formatted():
-    assert [p.price_eur for p in PACKAGES] == [500, 800, 1500]
+def test_format_price():
     assert format_price(1500) == "1 500 €"
-    assert total_if_all() == 2800
 
 
-def test_mockups_are_valid_svg_with_and_without_logo():
-    uri = logo_data_uri(b"<svg xmlns='http://www.w3.org/2000/svg'/>", "image/svg+xml")
-    for fn in MOCKUPS.values():
-        for logo in (None, uri):
-            root = ET.fromstring(fn("Boulangerie & Fils <Dupont>", logo))
-            assert root.tag.endswith("svg")
-    assert "Boulangerie" in MOCKUPS["or"]("Boulangerie Dupont")
-    assert "data:image/svg+xml;base64" in MOCKUPS["or"]("X Y Z", uri)
+# ---------- Inventaire du club ----------
+def test_default_inventory_numbers():
+    inv = C.default_inventory()
+    assert len(inv) == len(C.SLOTS) == 10
+    s = C.summarize(inv, C.DEFAULT_GOAL)
+    assert s["signed"] == 2400
+    assert s["remaining"] == 9600
+    assert s["free_value"] == 4250
+    assert s["gap"] == 5350
 
 
-def test_logo_validation():
-    with pytest.raises(ValueError):
-        logo_data_uri(b"x", "application/pdf")
-    with pytest.raises(ValueError):
-        logo_data_uri(b"x" * (3 * 1024 * 1024), "image/png")
+def test_every_slot_points_to_a_real_zone():
+    zones = json.loads((scenes.ASSETS / "zones.json").read_text())
+    for slot in C.SLOTS:
+        assert slot.scene in zones, slot.id
+        assert all(z < len(zones[slot.scene]["zones"]) for z in slot.zones), slot.id
 
 
-GOOD = {
-    "sector": "boulangerie",
+# ---------- Vérifications du plan (le code contrôle l'IA) ----------
+BASE = {
+    "sector": "automobile",
     "fit_reason": "a",
+    "need_link": "",
+    "offers": {"entree": ["banderole"], "recommandee": ["minibus"], "premium": ["minibus", "dos"]},
+    "benefits": {"banderole": "x", "minibus": "y", "dos": "z"},
     "email_subject": "s",
     "email_body": "b",
-    "benefits": {"bronze": "1", "argent": "2", "or": "3"},
+    "needs_human": False,
+    "human_reason": "",
 }
+
+
+def test_sanitize_drops_taken_slots_and_notes_it():
+    data = dict(BASE, offers={"entree": ["poitrine"], "recommandee": ["minibus", "poitrine"], "premium": ["minibus"]})
+    plan = llm.sanitize(data, C.default_inventory())
+    for ids in plan["offers"].values():
+        assert "poitrine" not in ids
+    assert any("déjà pris" in n for n in plan["notes"])
+    assert plan["offers"]["entree"]  # remplacé par une règle
+
+
+def test_sanitize_detects_sector_conflict():
+    data = dict(BASE, sector="immobilier-bâtiment")
+    plan = llm.sanitize(data, C.default_inventory())
+    assert plan["conflict"]["sponsor"] == "Groupe Lacroix Immobilier"
+    assert plan["needs_human"] is True
+
+
+def test_sanitize_unknown_sector_and_unknown_ids():
+    data = dict(BASE, sector="astrologie", offers={"entree": ["nimportequoi"], "recommandee": [], "premium": []})
+    plan = llm.sanitize(data, C.default_inventory())
+    assert plan["sector"] == "autre" and plan["conflict"] is None
+    free = {r["id"] for r in C.default_inventory() if r["Statut"] == "libre"}
+    for ids in plan["offers"].values():
+        assert ids and set(ids) <= free
+
+
+def test_sanitize_with_everything_taken():
+    inv = C.default_inventory()
+    for r in inv:
+        r["Statut"] = "pris"
+    plan = llm.sanitize(BASE, inv)
+    assert all(v == [] for v in plan["offers"].values())
 
 
 def _client(replies):
     it = iter(replies)
 
     def create(**kwargs):
-        content = next(it)
         return SimpleNamespace(
-            choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
-            usage=SimpleNamespace(prompt_tokens=1000, completion_tokens=400),
+            choices=[SimpleNamespace(message=SimpleNamespace(content=next(it)))],
+            usage=SimpleNamespace(prompt_tokens=1500, completion_tokens=800),
         )
 
     return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
 
 
-def test_generate_parses_json_and_costs():
-    data, meta = llm.generate_proposal("Boulangerie Dupont", client=_client(["texte " + json.dumps(GOOD)]))
-    assert data["sector"] == "boulangerie" and data["needs_human"] is False
+def test_plan_offer_parses_costs_and_falls_back():
+    inv = C.default_inventory()
+    plan, meta = llm.plan_offer("Garage Martin", "Lyon", "", inv, C.DEFAULT_NEEDS, 12000, client=_client(["ok " + json.dumps(BASE)]))
+    assert plan["offers"]["recommandee"] == ["minibus"]
     assert meta["model"] == llm.SMALL_MODEL
-    assert meta["cost_usd"] == pytest.approx((1000 * 0.10 + 400 * 0.50) / 1e6)
-
-
-def test_generate_falls_back_to_large_model():
-    data, meta = llm.generate_proposal("Boulangerie Dupont", client=_client(["pas de json", json.dumps(GOOD)]))
-    assert meta["model"] == llm.LARGE_MODEL
-
-
-def test_generate_fails_cleanly():
+    assert meta["cost_usd"] == pytest.approx((1500 * 0.10 + 800 * 0.50) / 1e6)
+    _, meta2 = llm.plan_offer("Garage Martin", "Lyon", "", inv, C.DEFAULT_NEEDS, 12000, client=_client(["pas de json", json.dumps(BASE)]))
+    assert meta2["model"] == llm.LARGE_MODEL
     with pytest.raises(llm.LLMError):
-        llm.generate_proposal("Boulangerie Dupont", client=_client(["rien", "toujours rien"]))
+        llm.plan_offer("Garage Martin", "Lyon", "", inv, C.DEFAULT_NEEDS, 12000, client=_client(["rien", "rien"]))
+
+
+# ---------- Pose du logo ----------
+def _png(draw_fn, size=(400, 160), mode="RGBA", bg=(0, 0, 0, 0), fmt="PNG"):
+    im = Image.new(mode, size, bg)
+    draw_fn(ImageDraw.Draw(im))
+    b = io.BytesIO()
+    im.save(b, fmt)
+    return b.getvalue()
+
+
+def test_white_background_is_removed_from_logo():
+    data = _png(lambda d: d.ellipse((60, 20, 340, 140), fill=(200, 40, 20)), mode="RGB", bg=(255, 255, 255), fmt="JPEG")
+    logo = scenes.load_logo(data)
+    a = np.asarray(logo)[..., 3]
+    assert a[0, 0] < 30 and a[a.shape[0] // 2, a.shape[1] // 2] > 200
+
+
+def test_load_logo_rejects_garbage_and_huge():
+    with pytest.raises(ValueError):
+        scenes.load_logo(b"pas une image")
+    with pytest.raises(ValueError):
+        scenes.load_logo(b"x" * (3 * 1024 * 1024))
+
+
+def test_perspective_coefficients_map_corners():
+    quad = [(100, 50), (300, 80), (290, 200), (90, 170)]
+    c = scenes._coeffs(quad, 200, 100)
+    for (x, y), (u, v) in zip(quad, [(0, 0), (200, 0), (200, 100), (0, 100)]):
+        d = c[6] * x + c[7] * y + 1
+        assert (c[0] * x + c[1] * y + c[2]) / d == pytest.approx(u, abs=1e-6)
+        assert (c[3] * x + c[4] * y + c[5]) / d == pytest.approx(v, abs=1e-6)
+
+
+@pytest.mark.parametrize("slot", C.SLOTS, ids=lambda s: s.id)
+def test_every_slot_renders_and_changes_only_its_zone(slot):
+    logo = scenes.wordmark("Garage Martin")
+    out = scenes.render_scene(slot.scene, slot.zones, logo)
+    plate = scenes._plate(slot.scene)
+    assert out.size == plate.size
+    diff = np.abs(np.asarray(out).astype(int) - np.asarray(plate).astype(int)).sum(axis=2) > 12
+    assert diff.sum() > 150  # le logo est bien posé
+    ys, xs = np.nonzero(diff)
+    quads = [scenes._zones()[slot.scene]["zones"][z]["quad"] for z in slot.zones]
+    pts = np.array([p for q in quads for p in q])
+    assert xs.min() >= pts[:, 0].min() - 6 and xs.max() <= pts[:, 0].max() + 6
+    assert ys.min() >= pts[:, 1].min() - 6 and ys.max() <= pts[:, 1].max() + 6
+
+
+def test_light_logo_stays_visible_on_white_support():
+    data = _png(lambda d: d.rounded_rectangle((10, 10, 390, 150), radius=30, outline=(255, 255, 255, 255), width=12))
+    out = np.asarray(scenes.render_scene("pitch_boards", (0,), scenes.load_logo(data))).astype(int)
+    q = np.array(scenes._zones()["pitch_boards"]["zones"][0]["quad"])
+    cx, cy = int(q[:, 0].mean()), int(q[:, 1].mean())
+    assert out[cy - 10 : cy + 10, cx - 10 : cx + 10].mean() < 120  # fond sombre posé derrière le logo clair
