@@ -203,7 +203,13 @@ From the bottom up: clubs that sign × price per club. 51,150 mid-size and 4,950
 Districts and leagues that pass the tool to their clubs, and direct calls. We have no agreement yet.
 
 **How reliable are your numbers?**
-The split of clubs by size uses data from 2011 and 2012, and the national total (about 165,000) is a weak source. We should check them with the Ministry of Sports.
+The calculations are checked twice, and every figure comes from one file. The inputs are less solid. The split of clubs by size uses data from 2011 and 2012, and the national total (about 165,000) is a weak source. The 9% of money from sponsors comes from the 2020 study of the French Olympic Committee, and we read it through a secondary source. The 37% of clubs that lose money is the top of a range (21% to 37% depending on the type of club). The €800 price of the minibus is our assumption. We will check these with the Ministry of Sports and with real clubs.
+
+**What does "break-even" mean on your slide?**
+It is the first month where we do not lose money: month 11, with 122 clubs. It is not the end of the story. We still have to pay back the lowest cash point, so total cash is back above zero only in month 21.
+
+**Where does the 37% come from?**
+From the 2020 study of the French Olympic Committee on the economic model of sports clubs. It is the highest share, for the most fragile type of club. We wrote "at most" on the slide for this reason. We could not open the full study again, so we treat it as a rough number.
 
 **Why a subscription, and not a share of the sponsors you help sign?**
 A share follows the value better, but it is hard to measure and hard to predict. We keep it as an option for big clubs.
@@ -224,7 +230,7 @@ It measures the visibility of clubs and finds deals. As far as we can tell, it d
 It is the lowest cash point (€14,967) plus six months of fixed costs (€18,000), rounded up.
 
 **What if you sign half as many clubs?**
-The break-even point moves later. We can change one number in `dossier/calc.py` and see the new result.
+The break-even point moves to about month 22, and the lowest cash goes to about minus 31,000 euros. At month 36, total cash would still be negative, about minus 17,000 euros. So the 35,000 euros would cover the gap, but with no safety margin. This is why the pilots must prove the speed of signing early. We can change one number in `dossier/calc.py` and see the new result.
 
 **Personal data, AI Act, fairness?**
 The prototype uses no personal data. In real use we would keep only what we need, set a storage time and sign a data agreement with the AI provider. We see the tool as limited risk, so the text is marked as written with AI. The tool does not rank people. The dates of the AI Act must be checked on the official site.
