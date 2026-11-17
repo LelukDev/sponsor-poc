@@ -38,7 +38,7 @@ Speaking speed: about 140 words a minute. Each text below is written to fit its 
 
 ### 1. Problem (Joshai, 1:15)
 
-"Let me start with Julien. Julien is the volunteer treasurer of a football club with 320 members. This is an example, but it is a real situation. Sponsors bring about 9% of the money of a club like his. That is a lot, because 37% of clubs lose money.
+"Let me start with Julien. Julien is the volunteer treasurer of a football club with 320 members. This is an example, but it is a real situation. Sponsors bring about 9% of the money of a club like his. That is a lot, because up to 37% of clubs lose money, depending on their type.
 
 When Julien looks for a sponsor, he does the same thing every time. He writes one offer alone, in the evening, and he sends the same PDF to every business. Three things go wrong. The pitch is the same for everyone. Sometimes he offers a slot that is already sold, because nobody has the list in mind. And the offer does not say what the club needs, like a new minibus or a tournament.
 
@@ -131,7 +131,7 @@ Henry: "Our team has four people, and each one owns one part."
 
 Our gross margin is 86%, because the AI costs almost nothing: about 4 dollars a month for 400 clubs.
 
-The break-even point is 122 clubs, and we reach it in month 11. Before that, cash goes down to its lowest point, minus 15,000 euros. After that, it goes up. At month 36, we have 400 clubs, 11,400 euros of revenue a month, and about 74,000 euros of cash.
+The break-even point is 122 clubs, and we reach it in month 11. That means the first month without a loss. Before that, cash goes down to its lowest point, minus 15,000 euros. Total cash is back above zero in month 21. At month 36, we have 400 clubs, 11,400 euros of revenue a month, and about 74,000 euros of cash.
 
 Everything here depends on our assumptions: the prices, and the speed at which we sign clubs. If we sign half as many clubs, break-even comes later. Our calculation file lets us change one number and see the result."
 

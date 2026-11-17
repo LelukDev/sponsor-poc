@@ -146,7 +146,7 @@ s.append(slide(1, "Problem", "Clubs have space to sell but no time to sell it", 
 <div class="two">
 <div>{lead([("The same pitch for everyone", "one PDF sent to every business"), ("Sold slots are offered again", "nobody has the list in mind"), ("Offers ignore the club's needs", "no link to the minibus or the tournament")])}
 <div class="persona"><b>Julien</b>, volunteer treasurer of a club with 320 members. He writes every offer alone, in the evening. (An example.)</div></div>
-<div><img class="photo" src="{img_empty}" alt="Empty advertising boards"><div class="stats"><div><span>9%</span>of a club's money comes from sponsors</div><div><span>37%</span>of clubs lose money</div><div><span>{eur(mid_base)}</span>sponsoring a year, mid-size club</div></div></div>
+<div><img class="photo" src="{img_empty}" alt="Empty advertising boards"><div class="stats"><div><span>9%</span>of a club's money comes from sponsors</div><div><span>37%</span>of local clubs lose money (at most)</div><div><span>{eur(mid_base)}</span>sponsoring a year, mid-size club</div></div></div>
 </div>""", "Source: CNOSF study on club funding (old data, rough numbers). Club size: average budget of €80,145."))
 
 s.append(slide(2, "Solution", "An AI assistant that writes the offer and shows the logo", f"""
@@ -218,7 +218,7 @@ rows = "".join(
 )
 s.append(slide(9, "Financials", f"We break even at {N['breakeven_clubs']} clubs, in month {be_month}", f"""
 <div class="two" style="grid-template-columns:640px 1fr">
-<div>{chart_svg()}<p class="small">Cash over time. Fixed costs {eur(N['FIXED_MONTH'])} a month. Clubs grow in a straight line to {N['som_clubs']}.</p></div>
+<div>{chart_svg()}<p class="small">Break-even = the first month without a loss. Total cash is back above zero in month 21. Fixed costs {eur(N['FIXED_MONTH'])} a month, clubs grow in a straight line to {N['som_clubs']}.</p></div>
 <div><div class="kpis row"><div><span>{N['contrib'] / N['blend_price'] * 100:.0f}%</span>gross margin</div><div><span>{N['breakeven_clubs']}</span>clubs to break even</div></div>
 <table class="tbl t2"><tr><th></th><th>Clubs</th><th>Revenue a month</th><th>Cash</th></tr>{rows}</table></div>
 </div>""", f"Prices: €{N['PRICE_MONTH']['mid']} and €{N['PRICE_MONTH']['flagship']} a month. These are our assumptions."))

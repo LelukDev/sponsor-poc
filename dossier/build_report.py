@@ -160,7 +160,7 @@ secs.append(f"""
 
 secs.append(f"""
 <h1>2. The problem</h1>
-<p>Sponsoring is a small but useful part of a club's money. A study by the French Olympic Committee says partnerships bring about {N['SPONSOR_SHARE'] * 100:.0f}% of the resources of sports clubs. It also says 37% of clubs lose money. Budgets are very different. 63% of clubs have less than €10,000. An average mid-size club has {eur(N['BUDGET']['mid'])}. An average big club has {eur(N['BUDGET']['flagship'])}.</p>
+<p>Sponsoring is a small but useful part of a club's money. A study by the French Olympic Committee says partnerships bring about {N['SPONSOR_SHARE'] * 100:.0f}% of the resources of sports clubs. It also says that up to 37% of clubs lose money, depending on the type of club. Budgets are very different. 63% of clubs have less than €10,000. An average mid-size club has {eur(N['BUDGET']['mid'])}. An average big club has {eur(N['BUDGET']['flagship'])}.</p>
 <p>Our example person is Julien, a volunteer treasurer of a football club with 320 members. He writes every sponsor pitch alone, in the evening. We think there are three problems. The pitches are all the same, so a bakery and a garage get the same text. The offers include slots that are already sold, or a business that competes with a current sponsor. Nothing links the offer to what the club needs this season. These three problems are our own guesses. We have not yet checked them with clubs. The first step of our plan is to call ten mid-size clubs.</p>
 {figure(f'<div class="pair"><img src="{img_empty}"><img src="{img_boards}"></div>', "Left: unsold advertising boards. Right: the same boards with a sponsor's logo placed by the tool. The logo is an example.")}
 """)
