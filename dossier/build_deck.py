@@ -1,9 +1,9 @@
-"""Construit le deck de 10 slides (HTML puis PDF) : version sobre, peu de texte, un visuel par slide.
+"""Build the 10-slide deck (HTML, then PDF): few words, one visual per slide, plain English.
 
-Usage : python dossier/build_deck.py
-Entrées : dossier/calc.py (chiffres), dossier/deck_config.json (nom du produit, lien de la démo, équipe)
-Sorties : dossier/deck.html et dossier/deck.pdf (Chrome en mode sans fenêtre)
-Règles du moodboard : trois puces au plus, un visuel, ponctuation naturelle, aucun tiret long ni flèche.
+Run: python dossier/build_deck.py
+Inputs: dossier/calc.py (numbers), dossier/deck_config.json (product name, demo link, team)
+Outputs: dossier/deck.html and dossier/deck.pdf (headless Chrome)
+The 10 section labels follow the brief of the course, in the same order.
 """
 
 import base64
@@ -60,11 +60,11 @@ def b64(img: Image.Image, w: int, q: int = 85) -> str:
 logo = demo_logo()
 img_empty = b64(scenes._plate("pitch_boards"), 760)
 img_van = b64(scenes.render_scene("minibus", (0,), logo), 760)
-boards_base = scenes.render_scene("pitch_boards", (0,), scenes.wordmark("Assurances Mercier"))
+boards_base = scenes.render_scene("pitch_boards", (0,), scenes.wordmark("Mercier Insurance"))
 img_boards = b64(scenes.render_scene("pitch_boards", (1, 2, 3), logo, base=boards_base), 760)
 img_back = b64(scenes.render_scene("jersey_back", (0,), logo), 760)
 
-# ---------- Trésorerie ----------
+# ---------- Cash ----------
 cash, cum = [], 0.0
 for t in range(37):
     if t > 0:
@@ -93,31 +93,31 @@ def chart_svg() -> str:
     pts = " ".join(f"{X(t):.1f},{Y(v):.1f}" for t, v in zip(range(37), cash))
     zero = f'<line x1="{L}" y1="{Y(0):.1f}" x2="{W - R}" y2="{Y(0):.1f}" stroke="{GREY}" stroke-width="1.5" stroke-dasharray="5 4"/>'
     be = f'<line x1="{X(be_month):.1f}" y1="{T}" x2="{X(be_month):.1f}" y2="{H - B}" stroke="{ACCENT}" stroke-width="3"/><text x="{X(be_month) + 10:.1f}" y="{T + 16}" font-size="16" fill="{INK}">Break-even, month {be_month}</text>'
-    low = f'<circle cx="{X(t_low):.1f}" cy="{Y(cash[t_low]):.1f}" r="5" fill="{NAVY}" stroke="#fff" stroke-width="2"/><text x="{X(be_month) + 12:.1f}" y="{Y(cash[t_low]) + 32:.1f}" font-size="16" fill="{INK}">Low point {eur_k(cash[t_low])}</text>'
+    low = f'<circle cx="{X(t_low):.1f}" cy="{Y(cash[t_low]):.1f}" r="5" fill="{NAVY}" stroke="#fff" stroke-width="2"/><text x="{X(be_month) + 12:.1f}" y="{Y(cash[t_low]) + 32:.1f}" font-size="16" fill="{INK}">Lowest cash {eur_k(cash[t_low])}</text>'
     end = f'<circle cx="{X(36):.1f}" cy="{Y(cash[36]):.1f}" r="5" fill="{NAVY}" stroke="#fff" stroke-width="2"/><text x="{X(36) - 12:.1f}" y="{Y(cash[36]) + 6:.1f}" text-anchor="end" font-size="16" fill="{INK}">{eur_k(cash[36])}</text>'
     return (
-        f'<svg viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="Cumulative cash over 36 months">{grid}{xt}{zero}{be}'
+        f'<svg viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="Cash over 36 months">{grid}{xt}{zero}{be}'
         f'<polyline points="{pts}" fill="none" stroke="{NAVY}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>{low}{end}'
         f'<text x="{(L + W - R) / 2:.0f}" y="{H - 2}" text-anchor="middle" font-size="15" fill="{GREY}">Months after launch</text></svg>'
     )
 
 
 def bars_svg() -> str:
-    """Valeur créée, prix, coût de service pour un club moyen, par mois."""
-    rows = [("Value created", I["y1_month"], "#B9C9E2"), ("Our price", N["PRICE_MONTH"]["intermediaire"], NAVY), ("Cost to serve", N["COST_SERVE_MONTH"]["intermediaire"], "#9AA3AF")]
+    """Value created, price and cost to serve for a mid-size club, per month."""
+    rows = [("Value created", I["y1_month"], "#B9C9E2"), ("Our price", N["PRICE_MONTH"]["mid"], NAVY), ("Cost to serve", N["COST_SERVE_MONTH"]["mid"], "#9AA3AF")]
     W, L, maxw = 620, 170, 380
     out = []
     for i, (lab, v, col) in enumerate(rows):
         y = 20 + i * 86
         w = max(8, maxw * v / I["y1_month"])
         out.append(f'<text x="0" y="{y + 30}" font-size="22" fill="{INK}">{lab}</text><rect x="{L}" y="{y}" width="{w:.0f}" height="44" rx="4" fill="{col}"/><text x="{L + w + 12:.0f}" y="{y + 31}" font-size="26" font-weight="700" fill="{INK}">{eur(v)}</text>')
-    return f'<svg viewBox="0 0 {W} 280" width="{W}" height="280" role="img" aria-label="Value created, price and cost per month for a mid-size club">{"".join(out)}</svg>'
+    return f'<svg viewBox="0 0 {W} 280" width="{W}" height="280" role="img" aria-label="Value, price and cost per month for a mid-size club">{"".join(out)}</svg>'
 
 
-# ---------- Mise en page ----------
-def slide(n, title, body, source=""):
+# ---------- Layout ----------
+def slide(n, label, title, body, source=""):
     return (
-        f'<section class="slide"><div class="rule"></div><h1>{title}</h1>{body}'
+        f'<section class="slide"><div class="label">{n} {label}</div><h1>{title}</h1>{body}'
         f'<div class="foot"><span>{html.escape(source)}</span><span>{n} / 10</span></div></section>'
     )
 
@@ -128,83 +128,82 @@ def bullets(items):
 
 s = []
 
-s.append(slide(1, "Clubs have space to sell, not the time", f"""
+s.append(slide(1, "Problem", "Clubs have space to sell but no time to sell it", f"""
 <div class="two">
-<div>{bullets(["Pitches are generic", "Offers include slots already sold", "Nothing ties the offer to the club's needs"])}
-<p class="small">Julien, volunteer treasurer of a 320-member club (illustrative persona).</p></div>
-<div><img class="photo" src="{img_empty}" alt="Empty advertising boards"><div class="stats"><div><span>9%</span>of budget from sponsors</div><div><span>37%</span>of clubs run a deficit</div></div></div>
-</div>""", "Source: CNOSF study on club financing. Older data, orders of magnitude."))
+<div>{bullets(["Pitches are all the same", "Offers include slots that are already sold", "Offers ignore what the club needs"])}
+<p class="small">Julien is a volunteer treasurer of a club with 320 members (an example).</p></div>
+<div><img class="photo" src="{img_empty}" alt="Empty advertising boards"><div class="stats"><div><span>9%</span>of a club's money comes from sponsors</div><div><span>37%</span>of clubs lose money</div></div></div>
+</div>""", "Source: CNOSF study on club funding (old data, rough numbers)."))
 
-s.append(slide(2, "A business name in, a ready offer out", f"""
-<p class="lead">An assistant that proposes only free slots and shows the sponsor's logo on the club's real kit.</p>
-<div class="steps"><div><i>1</i><b>The club describes itself</b><span>slots, sponsors, needs</span></div><div><i>2</i><b>AI chooses, code checks</b><span>free slots, real prices</span></div><div><i>3</i><b>Realistic mock-ups</b><span>logo in perspective</span></div></div>
+s.append(slide(2, "Solution", "An AI assistant that writes the offer and shows the logo", f"""
+<div class="moment"><b>Our moment of truth:</b> you type a business name, and you get an offer with its logo on the club's kit.</div>
+<div class="steps"><div><i>1</i><b>The club lists its slots</b><span>prices, sponsors, needs</span></div><div><i>2</i><b>AI picks, code checks</b><span>free slots, real prices</span></div><div><i>3</i><b>Realistic photos</b><span>logo placed on the kit</span></div></div>
 <div class="ba"><figure><img src="{img_empty}"><figcaption>Before</figcaption></figure><figure><img src="{img_boards}"><figcaption>After</figcaption></figure></div>""", ""))
 
 demo_line = f"Try it: {URL}" if URL else "Live link added at submission"
-s.append(slide(3, "Live demo: the jury chooses", f"""
+s.append(slide(3, "Live demo", "Live demo: you choose the business", f"""
 <div class="two" style="grid-template-columns:.8fr 1.2fr">
-<div>{bullets(["Name a local business", "Upload any logo", "Free or take a slot", "Try an alcohol business"])}<div class="url">{html.escape(demo_line)}</div><p class="small">About {COST_TXT} and 4 to 5 seconds per offer.</p></div>
-<div class="mosaic"><figure class="wide"><img src="{img_van}"><figcaption>Minibus</figcaption></figure><figure><img src="{img_boards}"><figcaption>Boards</figcaption></figure><figure><img src="{img_back}"><figcaption>Jersey back</figcaption></figure></div>
-</div>""", "Logo shown is an example."))
+<div>{bullets(["Name any local business", "Upload any logo", "Free or take a slot", "Try a wine bar"])}<div class="url">{html.escape(demo_line)}</div><p class="small">About {COST_TXT} and 4 to 5 seconds per offer.</p></div>
+<div class="mosaic"><figure class="wide"><img src="{img_van}"><figcaption>Minibus</figcaption></figure><figure><img src="{img_boards}"><figcaption>Pitch boards</figcaption></figure><figure><img src="{img_back}"><figcaption>Jersey back</figcaption></figure></div>
+</div>""", "The logo shown is an example."))
 
-s.append(slide(4, "A small market we can count", f"""
+s.append(slide(4, "Market analysis", "A small market that we can count", f"""
 <div class="funnel">
-<div class="card"><em>Market</em><strong>{eur(N['TAM'] / 1e6, 1)}M</strong><span>{N['n_inter'] + N['n_phare']:,} clubs in France</span></div>
-<div class="card"><em>Reachable</em><strong>{eur(N['SAM'] / 1e6, 2)}M</strong><span>{N['sam_clubs']:,} football and rugby clubs</span></div>
-<div class="card hl"><em>In 3 years</em><strong>{eur(N['SOM'] / 1000)}k</strong><span>{N['som_clubs']} clubs, {N['som_per_month']:.0f} new clubs a month</span></div>
+<div class="card"><em>Total market</em><strong>{eur(N['TAM'] / 1e6, 1)}M</strong><span>{N['n_mid'] + N['n_flag']:,} clubs × €{N['arpa']['mid']} to €{N['arpa']['flagship']:,} a year</span></div>
+<div class="card"><em>Market we can reach</em><strong>{eur(N['SAM'] / 1e6, 2)}M</strong><span>{N['sam_clubs']:,} football and rugby clubs</span></div>
+<div class="card hl"><em>Our target in 3 years</em><strong>{eur(N['SOM'] / 1000)}k</strong><span>{N['som_clubs']} clubs, {N['som_per_month']:.0f} new clubs a month</span></div>
 </div>
-{bullets(["Clubs that sign, times the price per club", "Small neighbourhood clubs are left out: they cannot pay"])}""",
-    "Sources: CNOSF club typology, FFF and FFR club counts. Prices are our assumptions."))
+{bullets(["Market = clubs that sign × price per club", "Small clubs are left out: they cannot pay"])}""",
+    "Sources: CNOSF club types, club counts from the football and rugby federations. Prices are our assumptions."))
 
-s.append(slide(5, f"€{N['PRICE_MONTH']['intermediaire']} a month, {I['capture'] * 100:.0f}% of the value we create", f"""
+s.append(slide(5, "Business model and price", f"€{N['PRICE_MONTH']['mid']} a month, which is {I['capture'] * 100:.0f}% of the value we create", f"""
 <div class="two" style="grid-template-columns:1.1fr .9fr">
-<div>{bars_svg()}<p class="small">Mid-size club, per month. Value assumes +30% sponsoring and 40% adoption in year 1.</p></div>
-<div>{bullets(["Subscription per club", "Priced at 10 to 30% of the gain", "Below the €19 to €49 clubs pay for management tools", f"Flagship clubs: €{N['PRICE_MONTH']['phare']} a month"])}</div>
-</div>""", "Prices are assumptions. The +30% uplift is tested in pilots."))
+<div>{bars_svg()}<p class="small">Mid-size club, per month. Value assumes 30% more sponsoring and 40% use in year 1.</p></div>
+<div>{bullets(["Monthly subscription per club", "Price is 10 to 30% of the gain", "Cheaper than club software (€19 to €49)", f"Big clubs pay €{N['PRICE_MONTH']['flagship']} a month"])}</div>
+</div>""", "Prices are assumptions. The 30% rise is tested in pilots."))
 
-s.append(slide(6, "No paying club yet. Here is the plan.", f"""
+s.append(slide(6, "Traction", "No paying club yet. Here is our plan.", f"""
 <div class="two">
-<div class="panel"><h3>Proven today</h3>{bullets(["Live demo on any business", f"{COST_TXT} and 4 to 5 s per offer", "Taken slots are never proposed", "Sector conflicts are flagged"])}</div>
-<div class="panel"><h3>Next 30 days</h3>{bullets(["10 calls to mid-size clubs", "3 pilot clubs", "2 district or league contacts", "Goal: +15% sponsoring"])}</div>
+<div class="panel"><h3>Proven today</h3>{bullets(["Live demo on any business", f"{COST_TXT} and 4 to 5 s per offer", "Taken slots are never offered", "Sector conflicts are flagged"])}</div>
+<div class="panel"><h3>Next 30 days</h3>{bullets(["Call 10 mid-size clubs", "Start 3 pilot clubs", "Meet 2 district or league contacts", "Goal: 15% more sponsoring"])}</div>
 </div>""", ""))
 
-s.append(slide(7, "We show the logo on the club's own kit", """
+s.append(slide(7, "Competition and defensibility", "Others write offers or find deals. We show the logo on the kit.", """
 <div class="two" style="grid-template-columns:1.25fr .75fr">
-<table class="tbl"><tr><th>Player</th><th>Focus</th></tr>
-<tr><td>All Sponsored</td><td>Visibility scan and brokerage</td></tr>
-<tr><td>Leedeel</td><td>Marketplace for brands and clubs</td></tr>
-<tr><td>Spencer.club</td><td>Human intermediary</td></tr>
+<table class="tbl"><tr><th>Player</th><th>What it does</th></tr>
+<tr><td>All Sponsored</td><td>Scans social media, finds deals</td></tr>
+<tr><td>Leedeel</td><td>Website linking brands and clubs</td></tr>
+<tr><td>Spencer.club</td><td>Person who connects both sides</td></tr>
 <tr><td>Proposal tools</td><td>Generic templates</td></tr></table>
-<div class="panel"><h3>Our moats</h3><ul class="b"><li>Data on what closes</li><li>Districts and leagues</li><li>The club's own workflow</li></ul></div>
-</div>""", "Sources: vendor pages and press, not tested by us."))
+<div class="panel"><h3>How we stay ahead</h3><ul class="b"><li>Data on which offers work</li><li>Links with districts and leagues</li><li>The club keeps its data with us</li></ul></div>
+</div>""", "Sources: company websites and press. We did not test these products."))
 
 cards = "".join(
     f'<div class="person"><div class="avatar">{html.escape(m["name"][0]) if m["name"] else ""}</div><b>{html.escape(m["name"]) if m["name"] else "Name to add"}</b><span>{html.escape(m["role"])}</span></div>'
     for m in CFG["team"]
 )
-s.append(slide(8, "Four people, four roles", f'<div class="team">{cards}</div>', ""))
+s.append(slide(8, "Team", "Our team", f'<div class="team">{cards}</div>', ""))
 
-s.append(slide(9, f"Break-even at {N['breakeven_clubs']} clubs, in month {be_month}", f"""
+s.append(slide(9, "Financials", f"We break even at {N['breakeven_clubs']} clubs, in month {be_month}", f"""
 <div class="two" style="grid-template-columns:680px 1fr">
-<div>{chart_svg()}<p class="small">Cumulative cash. Fixed costs {eur(N['FIXED_MONTH'])} a month, linear ramp to {N['som_clubs']} clubs.</p></div>
-<div class="kpis"><div><span>{N['contrib'] / N['blend_price'] * 100:.0f}%</span>gross margin</div><div><span>{N['breakeven_clubs']}</span>clubs to break even</div><div><span>{eur(N['mrr_full'])}</span>monthly revenue at month 36</div></div>
-</div>""", "All assumptions are listed in the report."))
+<div>{chart_svg()}<p class="small">Cash over time. Fixed costs {eur(N['FIXED_MONTH'])} a month. Clubs grow in a straight line to {N['som_clubs']}.</p></div>
+<div class="kpis"><div><span>{N['contrib'] / N['blend_price'] * 100:.0f}%</span>gross margin</div><div><span>{N['breakeven_clubs']}</span>clubs to break even</div><div><span>{eur(N['mrr_full'])}</span>revenue a month at month 36</div></div>
+</div>""", f"Prices: €{N['PRICE_MONTH']['mid']} and €{N['PRICE_MONTH']['flagship']} a month. These are our assumptions."))
 
-s.append(slide(10, "The ask: 18 months to break-even", f"""
+s.append(slide(10, "The ask", "We need 18 months to reach 122 clubs", f"""
 <div class="two" style="grid-template-columns:.9fr 1.1fr">
-<div class="ask">{eur(N['ask'])}<small>for 18 months. It covers the {eur(-N['trough'])} cash low point and a 6-month buffer.</small></div>
-<div><h3>Milestones</h3>{bullets(["3 pilot clubs with measured results", "1 district or league agreement", f"{N['breakeven_clubs']} paying clubs"])}</div>
+<div class="ask">{eur(N['ask'])}<small>for 18 months. It covers the {eur(-N['trough'])} lowest cash point and 6 months of safety.</small></div>
+<div><h3>What we will do</h3>{bullets(["3 pilot clubs with measured results", "1 district or league agreement", f"{N['breakeven_clubs']} paying clubs"])}</div>
 </div>""", ""))
 
 CSS = f"""
 @page {{ size: 1280px 720px; margin: 0 }}
 * {{ box-sizing: border-box }}
 body {{ margin:0; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:{INK}; background:{PAPER} }}
-.slide {{ width:1280px; height:720px; position:relative; padding:64px 84px 60px; page-break-after:always; overflow:hidden; background:{PAPER} }}
-.rule {{ width:54px; height:6px; background:{ACCENT}; margin-bottom:22px }}
-h1 {{ font-size:46px; line-height:1.14; margin:0 0 34px; max-width:1100px; font-weight:700 }}
+.slide {{ width:1280px; height:720px; position:relative; padding:60px 84px 60px; page-break-after:always; overflow:hidden; background:{PAPER} }}
+.label {{ display:inline-block; font-size:17px; font-weight:700; color:{NAVY}; border-left:6px solid {ACCENT}; padding-left:12px; margin-bottom:18px; letter-spacing:.02em }}
+h1 {{ font-size:46px; line-height:1.14; margin:0 0 32px; max-width:1100px; font-weight:700 }}
 h3 {{ font-size:22px; margin:0 0 14px; color:{NAVY} }}
-.lead {{ font-size:28px; line-height:1.4; margin:0 0 26px; max-width:1000px }}
 .small {{ font-size:16px; color:{GREY}; margin:12px 0 0; line-height:1.4 }}
 .foot {{ position:absolute; left:84px; right:84px; bottom:26px; font-size:13px; color:{GREY}; display:flex; justify-content:space-between }}
 .two {{ display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start }}
@@ -212,10 +211,11 @@ ul.b {{ margin:0; padding-left:26px; font-size:30px; line-height:1.35 }} ul.b li
 .panel {{ background:{PANEL}; border-radius:14px; padding:26px 30px }} .panel ul.b {{ font-size:27px }}
 .photo {{ width:100%; border-radius:10px; display:block }}
 .stats {{ display:flex; gap:44px; margin-top:16px; font-size:17px; color:{GREY} }} .stats span {{ display:block; font-size:44px; font-weight:700; color:{NAVY} }}
+.moment {{ background:{ACCENT}22; border-left:6px solid {ACCENT}; padding:14px 22px; font-size:24px; line-height:1.35; border-radius:6px; margin-bottom:24px }}
 .steps {{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-bottom:24px }}
 .steps div {{ background:{PANEL}; border-radius:12px; padding:18px 22px }} .steps i {{ font-style:normal; display:inline-block; width:34px; height:34px; border-radius:17px; background:{NAVY}; color:#fff; text-align:center; line-height:34px; font-weight:700; margin-bottom:8px }}
 .steps b {{ display:block; font-size:23px }} .steps span {{ font-size:19px; color:{GREY} }}
-.ba {{ display:grid; grid-template-columns:1fr 1fr; gap:24px }} .ba img {{ width:100%; height:200px; object-fit:cover; border-radius:10px; display:block }}
+.ba {{ display:grid; grid-template-columns:1fr 1fr; gap:24px }} .ba img {{ width:100%; height:150px; object-fit:cover; border-radius:10px; display:block }}
 figure {{ margin:0 }} figcaption {{ font-size:15px; color:{GREY}; margin-top:6px }}
 .mosaic {{ display:grid; grid-template-columns:1fr 1fr; gap:14px }} .mosaic img {{ width:100%; height:190px; object-fit:cover; border-radius:10px; display:block }} .mosaic .wide {{ grid-column:1/3 }} .mosaic .wide img {{ height:230px }}
 .url {{ font-size:22px; font-weight:700; color:{NAVY}; margin-top:18px; word-break:break-all }}
@@ -230,9 +230,9 @@ figure {{ margin:0 }} figcaption {{ font-size:15px; color:{GREY}; margin-top:6px
 .ask {{ background:{NAVY}; color:#fff; border-radius:16px; padding:46px 40px; font-size:78px; font-weight:700; line-height:1.05 }} .ask small {{ display:block; font-size:20px; font-weight:400; margin-top:18px; line-height:1.4 }}
 """
 
-doc = f"<!doctype html><html><head><meta charset='utf-8'><title>{NAME}</title><style>{CSS}</style></head><body>{''.join(s)}</body></html>"
+doc = f"<!doctype html><html lang='en'><head><meta charset='utf-8'><title>{NAME}</title><style>{CSS}</style></head><body>{''.join(s)}</body></html>"
 out_html, out_pdf = ROOT / "dossier" / "deck.html", ROOT / "dossier" / "deck.pdf"
 out_html.write_text(doc, encoding="utf-8")
 chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={out_pdf}", f"file://{out_html}"], check=True, capture_output=True, timeout=120)
-print(out_pdf, out_pdf.stat().st_size // 1024, "Ko")
+print(out_pdf, out_pdf.stat().st_size // 1024, "KB")

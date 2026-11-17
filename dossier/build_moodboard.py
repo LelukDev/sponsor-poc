@@ -1,4 +1,4 @@
-"""Moodboard du deck : une direction sobre, quelques décisions, un seul accent."""
+"""Moodboard of the deck: a sober direction, a few decisions, a single accent."""
 
 import base64
 import io

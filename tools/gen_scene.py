@@ -1,7 +1,7 @@
-"""Génère une photo de base avec des zones magenta repères (outil de préparation, hors application).
+"""Make a base photo with magenta marker zones (preparation tool, not part of the app).
 
-Usage : python tools/gen_scene.py <nom> "<prompt>" [modèle]
-Écrit assets/scenes/raw/<nom>.png et affiche le coût réel relevé par OpenRouter.
+Usage: python tools/gen_scene.py <name> "<prompt>" [model]
+Writes assets/scenes/raw/<name>.png and prints the real cost reported by OpenRouter.
 """
 
 import base64
@@ -40,14 +40,14 @@ def generate(name: str, prompt: str, model: str = MODEL) -> Path:
     msg = data["choices"][0]["message"]
     images = msg.get("images") or []
     if not images:
-        raise SystemExit("Pas d'image renvoyée : " + json.dumps(msg)[:400])
+        raise SystemExit("No image returned: " + json.dumps(msg)[:400])
     url = images[0]["image_url"]["url"]
     raw = base64.b64decode(url.split(",", 1)[1])
     out = ROOT / "assets" / "scenes" / "raw" / f"{name}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(raw)
     usage = data.get("usage", {})
-    print(f"{out}  ({len(raw)//1024} Ko)  coût: {usage.get('cost')}  usage: {usage}")
+    print(f"{out}  ({len(raw)//1024} KB)  cost: {usage.get('cost')}  usage: {usage}")
     return out
 
 

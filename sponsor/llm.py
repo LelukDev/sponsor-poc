@@ -1,7 +1,7 @@
-"""Étape « intelligence » : choisir les emplacements adaptés et rédiger, via OpenRouter.
+"""The "intelligence" step: pick the right slots and write the offer, through OpenRouter.
 
-L'IA propose ; le code vérifie : seuls des emplacements réellement libres sont retenus, les prix
-viennent de l'inventaire, et un conflit de secteur avec un sponsor existant est signalé.
+The AI proposes; the code checks. Only slots that are really free are kept, prices come from the
+inventory, and a sector conflict with a current sponsor is flagged.
 """
 
 import json
@@ -11,64 +11,51 @@ import time
 
 from openai import OpenAI
 
-from .club import CLUB, SECTORS, SLOT_BY_ID, club_facts
+from .club import CLUB, SECTORS, SLOT_BY_ID, STATUS_TAKEN, club_facts
 
 BASE_URL = "https://openrouter.ai/api/v1"
 SMALL_MODEL = "anthropic/claude-haiku-5.5"
 LARGE_MODEL = "anthropic/claude-sonnet-5.5"
-# Prix en USD par million de tokens (entrée, sortie), relevés sur OpenRouter.
+# Prices in USD per million tokens (input, output), read on OpenRouter.
 PRICES = {SMALL_MODEL: (0.10, 0.50), LARGE_MODEL: (2.00, 10.00)}
 
 SYSTEM = (
-    "Tu es l'assistant sponsoring d'un club sportif amateur français. Tu choisis les emplacements les mieux "
-    "adaptés à un commerce local, puis tu rédiges l'offre. Réponds uniquement par un objet JSON valide.\n"
-    "Règles :\n"
-    "- Ne propose QUE des identifiants d'emplacements LIBRES. Jamais un emplacement déjà pris.\n"
-    "- Priorité 1 : l'adéquation entre l'audience de l'emplacement et la clientèle du commerce (familles du quartier "
-    "pour un commerce alimentaire ou de santé, automobilistes pour un garage, parents d'enfants pour un magasin de sport…). "
-    "Priorité 2 : les besoins déclarés du club. Relie l'offre à un besoin seulement si le rapport est naturel "
-    "(un garage et le minibus, un magasin de sport et les chasubles) ; sinon laisse need_link vide. Ne cite pas le minibus "
-    "pour un commerce qui n'a aucun rapport avec les déplacements.\n"
-    "- Varie les emplacements d'entrée et recommandés selon le commerce ; ne propose pas toujours les mêmes.\n"
-    "- Trois offres : entrée = 1 emplacement abordable ; recommandee = 1 ou 2 emplacements les mieux adaptés ; "
-    "premium = 2 ou 3 emplacements incluant le meilleur. Si trop peu d'emplacements sont libres, réutilise-les.\n"
-    "- Utilise uniquement les faits fournis ; n'invente aucun chiffre ni aucune information sur le commerce. "
-    "Ne cite aucun prix (l'application les ajoute).\n"
-    "- Vouvoiement, ton simple, chaleureux et direct, sans formules administratives.\n"
-    "- L'activité se déduit du nom quand il contient un mot d'activité (Boulangerie, Garage, Pharmacie, Sport…) : "
-    "dans ce cas needs_human vaut false, même si le champ « activité indiquée » est vide. "
-    "needs_human vaut true seulement si le nom ne permet vraiment pas de connaître l'activité (nom de personne, "
-    "nom de fantaisie) ; rédige alors une version générique prudente. Remplis toujours tous les champs.\n"
-    "- Secteurs : un magasin ou club de sport relève de sport-loisirs ; boulangerie, boucherie, primeur : alimentation ; "
-    "garage, concessionnaire : automobile ; pharmacie, kiné, optique : santé-bien-être.\n"
-    "- Ponctuation naturelle : n'utilise jamais de tiret long, de demi-cadratin, de flèche ni de tiret pour couper une phrase ; "
-    "utilise des virgules et des points.\n"
-    f"- sector doit être exactement l'une de ces valeurs : {', '.join(SECTORS)}."
+    "You are the sponsorship assistant of an amateur sports club in France. You choose the best slots for a local "
+    "business, then you write the offer. Reply with one valid JSON object only.\n"
+    "Rules:\n"
+    "- Propose ONLY ids of FREE slots. Never propose a taken slot.\n"
+    "- Priority 1: match the audience of the slot with the customers of the business (neighbourhood families for food "
+    "or health shops, drivers for a garage, parents for a sports shop). Priority 2: the club's declared needs. Link the "
+    "offer to a need only if the link is natural (a garage and the minibus, a sports shop and the training bibs); "
+    "otherwise leave need_link empty. Do not mention the minibus for a business that has nothing to do with travel.\n"
+    "- Vary the entry slot and the recommended slots from one business to another. Do not always propose the same ones.\n"
+    "- Three offers. entree = 1 affordable slot. recommandee = 1 or 2 best-fitting slots. premium = 2 or 3 slots, "
+    "including the best one. If few slots are free, reuse them.\n"
+    "- Use only the facts you are given. Invent no figure and no information about the business. Quote no price, "
+    "the app adds them.\n"
+    "- Write in simple, warm and direct English. No stiff or formal phrases.\n"
+    "- Business names are often French: Boulangerie = bakery, Boucherie = butcher, Pharmacie = pharmacy, "
+    "Fleuriste = florist, Garage = car garage, Agence immobilière = estate agency, Coiffeur = hairdresser. "
+    "If the name contains such a word, the activity is known: needs_human is false, even if the activity field is empty. "
+    "Set needs_human to true only if the name does not show the activity (a person's name, a fancy name). In that case "
+    "write a careful, generic version and explain in human_reason. Always fill every field, including the email.\n"
+    f"- sector must be exactly one of: {', '.join(SECTORS)}.\n"
+    "- Sector hints: a sports shop or club is sport and leisure; bakery, butcher, greengrocer are food; garage and car "
+    "dealer are automotive; pharmacy, physiotherapist and optician are health and wellness.\n"
+    "- Each offer slot is a single slot, never combined: use the ids from the list only.\n"
+    "- Natural punctuation: never use long dashes, en dashes, arrows, or a dash to cut a sentence. Use commas and full stops."
 )
 
 SCHEMA_HINT = (
-    '{"sector": "valeur de la liste", '
-    '"fit_reason": "2 phrases : pourquoi ce commerce et ces emplacements", '
-    '"need_link": "1 phrase qui relie l\'offre à un besoin du club, ou chaîne vide", '
+    '{"sector": "one value from the list", '
+    '"fit_reason": "2 short sentences: why this business and these slots fit", '
+    '"need_link": "1 sentence that links the offer to a club need, or an empty string", '
     '"offers": {"entree": ["id"], "recommandee": ["id"], "premium": ["id", "id"]}, '
-    '"benefits": {"<id utilisé dans une offre>": "1 phrase concrète : où et par qui c\'est vu"}, '
-    '"email_subject": "objet du mail", '
-    f'"email_body": "6 à 9 lignes, signé « Le bureau de {CLUB["name"]} »", '
+    '"benefits": {"<id used in an offer>": "1 concrete sentence: where it is seen and by whom"}, '
+    '"email_subject": "email subject", '
+    f'"email_body": "6 to 9 short lines, signed \\"The board of {CLUB["name"]}\\"", '
     '"needs_human": false, "human_reason": ""}'
 )
-
-
-_DASHES = re.compile(r"\s*[\u2014\u2013\u2015]\s*|\s+-\s+")
-_ARROWS = re.compile(r"\s*[\u2192\u2190\u21d2]\s*")
-
-
-def clean_text(text: str) -> str:
-    """Retire les tirets longs, demi-cadratins, flèches et tirets de coupure typiques d'un texte généré."""
-    text = _DASHES.sub(", ", str(text))
-    text = _ARROWS.sub(" : ", text)
-    text = re.sub(r",\s*,", ",", text)
-    text = re.sub(r"\s+([,.])", r"\1", text)
-    return re.sub(r"[ \t]{2,}", " ", text).strip()
 
 
 class LLMError(RuntimeError):
@@ -85,7 +72,7 @@ def get_api_key() -> str:
         except Exception:
             key = ""
     if not key:
-        raise LLMError("Clé OPENROUTER_API_KEY absente.")
+        raise LLMError("The OPENROUTER_API_KEY secret is missing.")
     return key
 
 
@@ -99,6 +86,21 @@ def load_dotenv(path: str = ".env") -> None:
             os.environ.setdefault(k.strip(), v.strip())
 
 
+_DASH_CODES = "".join(chr(c) for c in (0x2014, 0x2013, 0x2015))
+_ARROW_CODES = "".join(chr(c) for c in (0x2192, 0x2190, 0x21D2))
+_DASHES = re.compile(r"\s*[" + _DASH_CODES + r"]\s*|\s+-\s+")
+_ARROWS = re.compile(r"\s*[" + _ARROW_CODES + r"]\s*")
+
+
+def clean_text(text: str) -> str:
+    """Remove long dashes, en dashes, arrows and cutting dashes that generated text often contains."""
+    text = _DASHES.sub(", ", str(text))
+    text = _ARROWS.sub(": ", text)
+    text = re.sub(r",\s*,", ",", text)
+    text = re.sub(r"\s+([,.;:!?])", r"\1", text)
+    return re.sub(r"[ \t]{2,}", " ", text).strip()
+
+
 def cost_usd(model: str, tokens_in: int, tokens_out: int) -> float:
     p_in, p_out = PRICES[model]
     return (tokens_in * p_in + tokens_out * p_out) / 1_000_000
@@ -107,21 +109,21 @@ def cost_usd(model: str, tokens_in: int, tokens_out: int) -> float:
 def _extract_json(text: str) -> dict:
     match = re.search(r"\{.*\}", text, flags=re.DOTALL)
     if not match:
-        raise ValueError("pas de JSON dans la réponse")
+        raise ValueError("no JSON in the answer")
     data = json.loads(match.group(0))
     for field in ("sector", "fit_reason", "email_subject", "email_body", "offers", "benefits"):
         if field not in data:
-            raise ValueError(f"champ manquant : {field}")
+            raise ValueError(f"missing field: {field}")
     if not isinstance(data["offers"], dict) or not isinstance(data["benefits"], dict):
-        raise ValueError("offers et benefits doivent être des objets")
+        raise ValueError("offers and benefits must be objects")
     return data
 
 
 def sanitize(data: dict, inventory: list[dict]) -> dict:
-    """Vérifications faites par le code : disponibilité, doublons, conflit de secteur, offres de secours."""
-    free = [r for r in inventory if r["Statut"] != "pris"]
+    """Checks done by the code: availability, duplicates, sector conflict, fallback offers."""
+    free = [r for r in inventory if r["Status"] != STATUS_TAKEN]
     free_ids = [r["id"] for r in free]
-    price = {r["id"]: int(r["Prix (€)"]) for r in inventory}
+    price = {r["id"]: int(r["Price (€)"]) for r in inventory}
     notes = []
 
     offers = {}
@@ -134,25 +136,25 @@ def sanitize(data: dict, inventory: list[dict]) -> dict:
             if i in free_ids and i not in clean:
                 clean.append(i)
             elif i in SLOT_BY_ID and i not in free_ids:
-                notes.append(f"« {SLOT_BY_ID[i].label} » écarté : déjà pris.")
+                notes.append(f'"{SLOT_BY_ID[i].label}" was removed: it is already taken.')
         offers[key] = clean[:3]
 
     by_price = sorted(free_ids, key=lambda i: price[i])
     if free_ids:
         if not offers["recommandee"]:
             offers["recommandee"] = by_price[len(by_price) // 2 : len(by_price) // 2 + 1]
-            notes.append("Offre recommandée complétée par une règle (choix du modèle inutilisable).")
+            notes.append("The recommended offer was completed by a rule (the model's choice could not be used).")
         if not offers["entree"]:
             offers["entree"] = by_price[:1]
         if not offers["premium"]:
             offers["premium"] = sorted(by_price[-3:], key=lambda i: price[i])
-    sector = data.get("sector") if data.get("sector") in SECTORS else "autre"
+    sector = data.get("sector") if data.get("sector") in SECTORS else "other"
 
     conflict = None
-    if sector != "autre":
+    if sector != "other":
         for r in inventory:
-            if r["Statut"] == "pris" and r.get("Secteur") == sector:
-                conflict = {"sponsor": r.get("Sponsor actuel") or "un sponsor", "sector": sector, "slot": r["Emplacement"]}
+            if r["Status"] == STATUS_TAKEN and r.get("Sector") == sector:
+                conflict = {"sponsor": r.get("Current sponsor") or "a sponsor", "sector": sector, "slot": r["Slot"]}
                 break
 
     benefits = {i: clean_text(data["benefits"].get(i, "")) for i in {j for v in offers.values() for j in v}}
@@ -161,8 +163,8 @@ def sanitize(data: dict, inventory: list[dict]) -> dict:
     if conflict:
         needs_human = True
         human_reason = (
-            f"Le secteur « {sector} » a déjà un partenaire ({conflict['sponsor']}, {conflict['slot']}). "
-            "Vérifier la clause d'exclusivité avant d'envoyer. " + human_reason
+            f'The sector "{sector}" already has a partner ({conflict["sponsor"]}, {conflict["slot"]}). '
+            "Check the exclusivity clause before you send this. " + human_reason
         ).strip()
     return {
         "sector": sector,
@@ -171,7 +173,7 @@ def sanitize(data: dict, inventory: list[dict]) -> dict:
         "offers": offers,
         "benefits": benefits,
         "email_subject": clean_text(data["email_subject"]),
-        "email_body": "\n".join(clean_text(l) if l.strip() else "" for l in str(data["email_body"]).splitlines()).strip(),
+        "email_body": "\n".join(clean_text(line) if line.strip() else "" for line in str(data["email_body"]).splitlines()).strip(),
         "needs_human": needs_human,
         "human_reason": human_reason,
         "conflict": conflict,
@@ -203,13 +205,13 @@ def _call(client, model: str, user: str) -> tuple[dict, dict]:
 
 
 def plan_offer(business: str, city: str, sector_hint: str, inventory: list[dict], needs: str, goal: int, client=None):
-    """Retourne (plan vérifié, mesures). Petit modèle par défaut, grand modèle si la réponse est inutilisable."""
+    """Return (checked plan, measures). Small model first, large model if the answer cannot be used."""
     if client is None:
         client = OpenAI(base_url=BASE_URL, api_key=get_api_key(), timeout=60)
     user = (
-        f"{club_facts(inventory, needs, goal)}\n\nCommerce à démarcher : {business}\n"
-        f"Ville : {city or 'non précisée'}\nActivité indiquée : {sector_hint or 'non précisée'}\n\n"
-        f"Format JSON attendu :\n{SCHEMA_HINT}"
+        f"{club_facts(inventory, needs, goal)}\n\nBusiness to approach: {business}\n"
+        f"City: {city or 'not given'}\nActivity given: {sector_hint or 'not given'}\n\n"
+        f"Expected JSON format:\n{SCHEMA_HINT}"
     )
     last_error = None
     for model in (SMALL_MODEL, LARGE_MODEL):
@@ -218,4 +220,4 @@ def plan_offer(business: str, city: str, sector_hint: str, inventory: list[dict]
             return sanitize(data, inventory), meta
         except (ValueError, json.JSONDecodeError) as exc:
             last_error = exc
-    raise LLMError(f"Réponse inutilisable après deux modèles : {last_error}")
+    raise LLMError(f"Unusable answer after two models: {last_error}")

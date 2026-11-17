@@ -1,11 +1,11 @@
-"""Profil du club de démonstration : emplacements, état de l'inventaire, besoins. Tout est fictif."""
+"""Demo club profile: slots, inventory state, needs. Everything here is fictional."""
 
 from dataclasses import dataclass
 
 CLUB = {
     "name": "AS Val de Saône",
     "sport": "football",
-    "area": "agglomération lyonnaise",
+    "area": "Lyon area",
     "licensees": 320,
     "teams": 14,
     "home_matches_per_season": 60,
@@ -13,57 +13,61 @@ CLUB = {
 }
 
 SECTORS = [
-    "alimentation",
-    "restauration",
-    "automobile",
-    "banque-assurance",
-    "immobilier-bâtiment",
-    "santé-bien-être",
-    "commerce-équipement",
-    "services-entreprises",
-    "énergie-télécom",
-    "sport-loisirs",
-    "autre",
+    "food",
+    "restaurants",
+    "automotive",
+    "banking and insurance",
+    "real estate and construction",
+    "health and wellness",
+    "retail and equipment",
+    "business services",
+    "energy and telecom",
+    "sport and leisure",
+    "other",
 ]
+
+STATUS_FREE, STATUS_TAKEN = "free", "taken"
 
 
 @dataclass(frozen=True)
 class Slot:
     id: str
     label: str
-    price: int  # par saison, grille d'exemple
+    price: int  # per season, example grid
     scene: str
     zones: tuple
-    where: str  # où le support est vu, pour l'IA
-    crop: bool = False  # gros plan pour les petits supports
+    where: str  # where the slot is seen, used by the AI
+    crop: bool = False  # close-up for small slots
 
 
 SLOTS = (
-    Slot("poitrine", "Maillot, poitrine", 1500, "kit_front", (0,), "porté par tous les joueurs, photos de match, réseaux du club"),
-    Slot("dos", "Maillot, dos (au-dessus du numéro)", 700, "jersey_back", (0,), "vu par les adversaires et les spectateurs derrière les joueurs"),
-    Slot("manche", "Maillot, manche", 600, "kit_front", (2,), "visible sur toutes les photos de profil", True),
-    Slot("short", "Short", 400, "kit_front", (1,), "visible sur les photos d'équipe", True),
-    Slot("barriere_a", "Barrière principale du terrain", 600, "pitch_boards", (0,), "face à la tribune, vue de tous les spectateurs"),
-    Slot("barrieres_b", "Barrières du terrain (3 panneaux)", 900, "pitch_boards", (1, 2, 3), "le long de la touche, vues par les familles"),
-    Slot("minibus", "Minibus du club", 800, "minibus", (0,), "circule dans toute l'agglomération à chaque déplacement"),
-    Slot("banderole", "Bâche de l'entrée du stade", 500, "banner_gate", (0,), "vue par chaque visiteur à son arrivée"),
-    Slot("chasubles", "Chasubles d'entraînement (lot)", 350, "bibs", (0, 1, 2), "portées aux entraînements de l'école de foot, vues des parents"),
-    Slot("barnum", "Barnum de la buvette", 300, "tent", (0,), "au centre des tournois et des jours de match"),
+    Slot("poitrine", "Jersey, chest", 1500, "kit_front", (0,), "worn by every player, match photos, club social media"),
+    Slot("dos", "Jersey, back (above the number)", 700, "jersey_back", (0,), "seen by opponents and by spectators behind the players"),
+    Slot("manche", "Jersey, sleeve", 600, "kit_front", (2,), "visible on every profile photo", True),
+    Slot("short", "Shorts", 400, "kit_front", (1,), "visible on team photos", True),
+    Slot("barriere_a", "Main pitch board", 600, "pitch_boards", (0,), "in front of the stand, seen by every spectator"),
+    Slot("barrieres_b", "Pitch boards (3 panels)", 900, "pitch_boards", (1, 2, 3), "along the touchline, seen by families"),
+    Slot("minibus", "Club minibus", 800, "minibus", (0,), "drives around the area at every away game"),
+    Slot("banderole", "Stadium entrance banner", 500, "banner_gate", (0,), "seen by every visitor when they arrive"),
+    Slot("chasubles", "Training bibs (set)", 350, "bibs", (0, 1, 2), "worn at football school training, seen by parents"),
+    Slot("barnum", "Refreshment tent", 300, "tent", (0,), "at the centre of tournaments and match days"),
 )
 SLOT_BY_ID = {s.id: s for s in SLOTS}
 
 DEFAULT_TAKEN = {
-    "poitrine": ("Groupe Lacroix Immobilier", "immobilier-bâtiment"),
-    "barriere_a": ("Assurances Mercier", "banque-assurance"),
-    "barnum": ("Pizzeria Da Marco", "restauration"),
+    "poitrine": ("Lacroix Real Estate", "real estate and construction"),
+    "barriere_a": ("Mercier Insurance", "banking and insurance"),
+    "barnum": ("Da Marco Pizzeria", "restaurants"),
 }
 
 DEFAULT_NEEDS = (
-    "Renouveler le minibus du club (devis : 9 000 €). "
-    "Équiper l'école de foot en chasubles pour septembre. "
-    "Financer le tournoi des U13 en mai."
+    "Replace the club minibus (quote: €9,000). "
+    "Equip the football school with training bibs for September. "
+    "Fund the U13 tournament in May."
 )
 DEFAULT_GOAL = 12_000
+
+COLUMNS = ("Slot", "Price (€)", "Status", "Current sponsor", "Sector")
 
 
 def default_inventory() -> list[dict]:
@@ -73,21 +77,21 @@ def default_inventory() -> list[dict]:
         rows.append(
             {
                 "id": s.id,
-                "Emplacement": s.label,
-                "Prix (€)": s.price,
-                "Statut": "pris" if taken else "libre",
-                "Sponsor actuel": taken[0] if taken else "",
-                "Secteur": taken[1] if taken else "",
+                "Slot": s.label,
+                "Price (€)": s.price,
+                "Status": STATUS_TAKEN if taken else STATUS_FREE,
+                "Current sponsor": taken[0] if taken else "",
+                "Sector": taken[1] if taken else "",
             }
         )
     return rows
 
 
 def summarize(inventory: list[dict], goal: int) -> dict:
-    taken = [r for r in inventory if r["Statut"] == "pris"]
-    free = [r for r in inventory if r["Statut"] != "pris"]
-    signed = sum(int(r["Prix (€)"]) for r in taken)
-    free_value = sum(int(r["Prix (€)"]) for r in free)
+    taken = [r for r in inventory if r["Status"] == STATUS_TAKEN]
+    free = [r for r in inventory if r["Status"] != STATUS_TAKEN]
+    signed = sum(int(r["Price (€)"]) for r in taken)
+    free_value = sum(int(r["Price (€)"]) for r in free)
     return {
         "signed": signed,
         "remaining": max(goal - signed, 0),
@@ -101,16 +105,44 @@ def summarize(inventory: list[dict], goal: int) -> dict:
 def club_facts(inventory: list[dict], needs: str, goal: int) -> str:
     s = summarize(inventory, goal)
     free_lines = "\n".join(
-        f"- {r['id']} : {r['Emplacement']} ({r['Prix (€)']} € par saison) ; {SLOT_BY_ID[r['id']].where}" for r in s["free"]
-    ) or "- aucun"
+        f"- {r['id']}: {r['Slot']} (€{r['Price (€)']} per season); {SLOT_BY_ID[r['id']].where}" for r in s["free"]
+    ) or "- none"
     taken_lines = "\n".join(
-        f"- {r['id']} : {r['Emplacement']}, déjà pris par {r['Sponsor actuel'] or 'un sponsor'} (secteur : {r['Secteur'] or 'inconnu'})"
+        f"- {r['id']}: {r['Slot']}, already taken by {r['Current sponsor'] or 'a sponsor'} (sector: {r['Sector'] or 'unknown'})"
         for r in s["taken"]
-    ) or "- aucun"
+    ) or "- none"
     return (
-        f"Club : {CLUB['name']} ({CLUB['sport']}, {CLUB['area']}). {CLUB['licensees']} licenciés, {CLUB['teams']} équipes, "
-        f"environ {CLUB['home_matches_per_season']} matchs à domicile par saison, environ {CLUB['families']} familles touchées.\n"
-        f"Besoins déclarés du club : {needs.strip() or 'non précisés'}\n"
-        f"Objectif de collecte de la saison : {goal} € ; déjà signé : {s['signed']} € ; reste à lever : {s['remaining']} €.\n"
-        f"Emplacements LIBRES :\n{free_lines}\nEmplacements DÉJÀ PRIS :\n{taken_lines}"
+        f"Club: {CLUB['name']} ({CLUB['sport']}, {CLUB['area']}). {CLUB['licensees']} members, {CLUB['teams']} teams, "
+        f"about {CLUB['home_matches_per_season']} home matches per season, about {CLUB['families']} families reached.\n"
+        f"Declared needs of the club: {needs.strip() or 'not given'}\n"
+        f"Fundraising goal for the season: €{goal}; already signed: €{s['signed']}; left to raise: €{s['remaining']}.\n"
+        f"FREE slots:\n{free_lines}\nTAKEN slots:\n{taken_lines}"
     )
+
+
+def _text(value) -> str:
+    return "" if value is None or value != value else str(value).strip()
+
+
+def inventory_from_frame(df) -> list[dict]:
+    """Turn the edited table into a clean inventory. Empty cells, bad statuses and unknown sectors are fixed here."""
+    rows = []
+    for slot, rec in zip(SLOTS, df.to_dict("records")):
+        price = rec.get("Price (€)")
+        try:
+            price = 0 if price is None or price != price else max(0, int(price))
+        except (TypeError, ValueError):
+            price = slot.price
+        status = _text(rec.get("Status"))
+        sector = _text(rec.get("Sector"))
+        rows.append(
+            {
+                "id": slot.id,
+                "Slot": slot.label,
+                "Price (€)": price,
+                "Status": status if status in (STATUS_FREE, STATUS_TAKEN) else STATUS_FREE,
+                "Current sponsor": _text(rec.get("Current sponsor")),
+                "Sector": sector if sector in SECTORS else "",
+            }
+        )
+    return rows

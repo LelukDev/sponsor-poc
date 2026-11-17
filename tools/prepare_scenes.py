@@ -1,8 +1,8 @@
-"""Prépare les scènes : détecte les zones magenta, calcule leurs quadrilatères, efface le magenta.
+"""Prepare the scenes: find the magenta zones, compute their shapes, remove the magenta.
 
-Entrée : assets/scenes/raw/*.png (photos générées avec des repères magenta)
-Sortie : assets/scenes/<scène>.jpg (plaque propre) et assets/scenes/zones.json
-Outil de préparation, lancé une fois ; l'application n'en a pas besoin à l'exécution.
+Input: assets/scenes/raw/*.png (photos generated with magenta markers)
+Output: assets/scenes/<scene>.jpg (clean plate) and assets/scenes/zones.json
+Preparation tool, run once. The app does not need it at run time.
 """
 
 import json
@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "assets" / "scenes" / "raw"
 OUT = ROOT / "assets" / "scenes"
 
-# mode : "fabric" = on prolonge le tissu autour ; "paint" = support blanc peint (panneau, bâche, carrosserie)
-# order : "area" (plus grande d'abord) ou "x" (de gauche à droite)
+# mode: "fabric" = extend the fabric around; "paint" = white painted support (board, banner, van body)
+# order: "area" (biggest first) or "x" (left to right)
 SCENES = {
     "kit_front": {"mode": "fabric", "order": "area"},
     "jersey_back": {"mode": "fabric", "order": "x"},
@@ -68,7 +68,7 @@ def fill_fabric(img: np.ndarray, zone: np.ndarray, others: np.ndarray, rng) -> N
     fill = np.stack([Z @ coefs[c] for c in range(3)], axis=1)
     resid = px - np.stack([A @ coefs[c] for c in range(3)], axis=1)
     sigma = np.minimum(resid.std(axis=0) * 0.5, 4.0)
-    noise = rng.normal(0, 1, size=fill.shape) * sigma  # texture légère
+    noise = rng.normal(0, 1, size=fill.shape) * sigma  # light texture
     new = np.clip(fill + noise, 0, 255)
     soft = ndi.gaussian_filter(big.astype(float), 1.2)[zy, zx][:, None]
     img[zy, zx] = img[zy, zx] * (1 - soft) + new * soft
@@ -84,7 +84,7 @@ def fill_paint(img: np.ndarray, zone: np.ndarray, others: np.ndarray, rng) -> No
     whites = (sat < 0.25) & (lum > 140)
     color = np.median(px[whites], axis=0) if whites.sum() > 40 else np.array([236.0, 237.0, 235.0])
     color = np.minimum(color, 244.0)
-    if color.max() < 228.0:  # support peint blanc : on évite un gris trop sombre
+    if color.max() < 228.0:  # white painted support: avoid a grey that is too dark
         color = color * (228.0 / color.max())
     zy, zx = np.nonzero(big)
     noise = rng.normal(0, 1.2, size=(len(zy), 1))

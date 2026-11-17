@@ -1,7 +1,7 @@
-"""Pose d'un logo sur des photos réalistes : perspective, lumière du support, texture du tissu.
+"""Place a logo on realistic photos: perspective, light of the support, texture of the fabric.
 
-Les photos de base (plaques propres) et les quadrilatères des zones sont préparés une fois par
-tools/prepare_scenes.py. À l'exécution : aucun appel réseau, aucun coût, quelques dizaines de ms.
+The base photos (clean plates) and the zone shapes are prepared once by tools/prepare_scenes.py.
+At run time: no network call, no cost, a few tens of milliseconds.
 """
 
 import functools
@@ -29,12 +29,12 @@ def _plate(scene: str) -> Image.Image:
 # ---------- Logo ----------
 def load_logo(data: bytes) -> Image.Image:
     if len(data) > MAX_LOGO_BYTES:
-        raise ValueError("Logo trop lourd (2 Mo maximum).")
+        raise ValueError("The logo file is too heavy (2 MB maximum).")
     try:
         img = Image.open(io.BytesIO(data))
         img.load()
     except Exception as exc:
-        raise ValueError("Logo illisible (png, jpg ou webp).") from exc
+        raise ValueError("The logo file is unreadable. Please use png, jpg or webp.") from exc
     img = img.convert("RGBA")
     if max(img.size) > 1600:
         img.thumbnail((1600, 1600))
@@ -42,19 +42,19 @@ def load_logo(data: bytes) -> Image.Image:
 
 
 def prepare_logo(img: Image.Image) -> Image.Image:
-    """Retire un fond uni clair si le logo n'a pas de transparence, puis recadre."""
+    """Remove a plain light background if the logo has no transparency, then crop."""
     arr = np.asarray(img).astype(float)
     alpha = arr[..., 3]
     if alpha.min() >= 250:  # pas de vraie transparence
         border = np.concatenate([arr[0, :, :3], arr[-1, :, :3], arr[:, 0, :3], arr[:, -1, :3]])
         bg = np.median(border, axis=0)
-        if bg.mean() > 200:  # fond clair : on le rend transparent
+        if bg.mean() > 200:  # light background: make it transparent
             dist = np.abs(arr[..., :3] - bg).max(axis=2)
             alpha = np.clip((dist - 18) / 40.0, 0, 1) * 255
             arr[..., 3] = alpha
     ys, xs = np.nonzero(arr[..., 3] > 12)
     if len(ys) == 0:
-        raise ValueError("Logo vide.")
+        raise ValueError("The logo is empty.")
     out = Image.fromarray(arr.astype(np.uint8), "RGBA")
     pad = max(2, int(0.02 * max(out.size)))
     box = (max(xs.min() - pad, 0), max(ys.min() - pad, 0), min(xs.max() + pad + 1, out.width), min(ys.max() + pad + 1, out.height))
@@ -62,8 +62,8 @@ def prepare_logo(img: Image.Image) -> Image.Image:
 
 
 def wordmark(name: str) -> Image.Image:
-    """Logo de remplacement : le nom du commerce en lettres sombres."""
-    text = " ".join(name.strip().split())[:28] or "Partenaire"
+    """Replacement logo: the name of the business in dark letters."""
+    text = " ".join(name.strip().split())[:28] or "Partner"
     words = text.split()
     lines = [text] if len(text) <= 14 or len(words) < 2 else [" ".join(words[: len(words) // 2 or 1]), " ".join(words[len(words) // 2 or 1:])]
     font = ImageFont.load_default(size=120)
@@ -83,9 +83,9 @@ def _luma(rgb: np.ndarray) -> np.ndarray:
     return rgb[..., 0] * 0.299 + rgb[..., 1] * 0.587 + rgb[..., 2] * 0.114
 
 
-# ---------- Géométrie ----------
+# ---------- Geometry ----------
 def _coeffs(quad, w, h):
-    """Coefficients PIL : pixel de sortie (dans le quad) -> pixel du rectangle source."""
+    """PIL coefficients: output pixel (inside the quad) to pixel of the source rectangle."""
     src = [(0, 0), (w, 0), (w, h), (0, h)]
     A, B = [], []
     for (x, y), (u, v) in zip(quad, src):
@@ -104,12 +104,12 @@ def _rect_size(quad):
     return (_dist(tl, tr) + _dist(bl, br)) / 2, (_dist(tl, bl) + _dist(tr, br)) / 2
 
 
-# ---------- Rendu d'une zone ----------
+# ---------- Rendering one zone ----------
 LIGHT_BG, DARK_BG = (252, 252, 250, 255), (28, 34, 46, 255)
 
 
 def _card(w: int, h: int, logo: Image.Image, patch: bool, paint: bool, bg=LIGHT_BG) -> Image.Image:
-    """Rectangle redressé : fond (clair, sombre ou transparent) + logo ajusté."""
+    """Straightened rectangle: background (light, dark or transparent) plus the fitted logo."""
     if paint:
         card = Image.new("RGBA", (w, h), bg)
     elif patch:
@@ -171,8 +171,8 @@ def render_scene(scene: str, zone_ids, logo: Image.Image, base: Image.Image | No
         a = np.asarray(Image.fromarray((a * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))).astype(float) / 255.0
         rgb = layer[..., :3]
         if paint:
-            # le logo « imprimé » sur un support blanc éclairé : on multiplie par la lumière de la plaque
-            lit = arr * rgb  # la lumière vient toujours de la plaque propre
+            # the logo "printed" on a lit white support: multiply by the light of the plate
+            lit = arr * rgb  # the light always comes from the clean plate
             out = out * (1 - a[..., None]) + lit * a[..., None]
         else:
             ref = max(scene_luma, 0.05)
@@ -183,7 +183,7 @@ def render_scene(scene: str, zone_ids, logo: Image.Image, base: Image.Image | No
 
 
 def closeup(img: Image.Image, scene: str, zone_ids, min_frac: float = 0.62) -> Image.Image:
-    """Gros plan centré sur les zones, au même rapport largeur/hauteur que l'image."""
+    """Close-up centred on the zones, with the same width to height ratio as the image."""
     cfg = _zones()[scene]
     pts = [p for zi in zone_ids for p in cfg["zones"][zi]["quad"]]
     xs, ys = [p[0] for p in pts], [p[1] for p in pts]
