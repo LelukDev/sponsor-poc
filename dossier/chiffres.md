@@ -114,8 +114,8 @@ Le prix reste sous les 19 à 49 € d'un logiciel de gestion : l'outil est un co
 ## 6. Coût de l'IA, mesuré puis projeté (S3 et S5)
 
 - Une proposition = 1 appel, 516 tokens en entrée, 712 en sortie **[M]**.
-- Petit modèle (claude-haiku-5,5, 0,10 / 0,50 $ par million) : **0,00041 $** par proposition ; temps mesuré 3 à 4 s.
-- Grand modèle (claude-sonnet-5,5, 2 / 10 $ par million) : 0,00815 $ par proposition.
+- Petit modèle (claude-haiku-5.5, 0,10 / 0,50 $ par million) : **0,00041 $** par proposition ; temps mesuré 3 à 4 s.
+- Grand modèle (claude-sonnet-5.5, 2 / 10 $ par million) : 0,00815 $ par proposition.
 - À l'échelle du SOM : 7 800 propositions par mois → **3,2 $ par mois** avec le petit modèle (0,03% du chiffre d'affaires mensuel), 64 $ avec le grand modèle (0,6%).
 - Le coût de l'IA n'est donc pas le sujet : l'hébergement et le support dominent. Le temps mesuré (3 à 4 s) dépasse la cible de 3 s du cours ; piste : afficher le texte au fil de l'eau.
 

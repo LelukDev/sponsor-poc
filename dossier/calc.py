@@ -250,6 +250,7 @@ import re
 out = Path(__file__).with_name("chiffres.md")
 text = "\n".join(md)
 text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)  # décimales à la française
+text = text.replace("haiku-5,5", "haiku-5.5").replace("sonnet-5,5", "sonnet-5.5")
 out.write_text(text, encoding="utf-8")
 print(out)
 print(f"TAM {TAM/1e6:.1f} M | SAM {SAM/1e6:.2f} M | SOM {SOM:,.0f} | BE {breakeven_clubs} clubs mois {be_month} | trough {trough:,.0f} | ask {ask:,}")
