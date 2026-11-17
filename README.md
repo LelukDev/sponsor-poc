@@ -1,8 +1,8 @@
 # Proposition de sponsoring : PoC
 
-Démo du moment de vérité (*moment of truth*) : un commerce local, cité par le jury, devient une proposition de sponsoring avec le logo posé sur un maillot, un minibus et un panneau de stade.
+Démo du moment de vérité (*moment of truth*) : un commerce local, cité par le jury, devient une proposition de sponsoring qui tient compte des emplacements libres du club, avec son logo posé sur des photos réalistes (maillot, barrières, minibus, bâche, chasubles, barnum).
 
-Club, effectifs et prix : fictifs, voir `sponsor/club.py` et `sponsor/pricing.py`.
+Club, effectifs, sponsors et prix : fictifs, voir `sponsor/club.py`.
 
 ## Fonctionnement
 
